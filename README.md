@@ -156,11 +156,11 @@ url：/api/user/address/query
 
 说明：根据关键词，搜索省/市/详细地址里包含指定关键词的字段
 
-参数：search_keyword
+参数：username, search_keyword
 
 示例：
 
-- url:/api/user/address/query?search_keyword=武汉大学
+- url:/api/user/address/query?username=Y2hlbmdmZW5nZ3Vp&&search_keyword=武汉大学
 - 附带json：无
 - 回送：如前
 
@@ -176,7 +176,7 @@ url：/api/user/address/add
 
 示例：
 
-- url:/api/user/address/add
+- url: /api/user/address/add
 - 附带json：		
 
 ```json
@@ -208,11 +208,11 @@ url：/api/user/address/delete
 
 说明：根据id，删除指定字段
 
-参数：id
+参数：username, id
 
 示例：
 
-- url:/api/user/address/delete?id=1
+- url:/api/user/address/delete?username=Y2hlbmdmZW5nZ3Vp&&id=1
 - 附带json：无
 - 回送：
 
