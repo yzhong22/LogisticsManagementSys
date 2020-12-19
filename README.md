@@ -315,6 +315,9 @@ url: /api/user/order/queryAll
           	"ifFull":false,
           	"arrivingTime":"1608347981718",		// 13位毫秒级时间戳
           	"leavingTime":"1608347981718",		// 13位毫秒级时间戳
+        },
+      	{
+          	......
         }
     ],
   	"entryTime":"1608347981718",		// 13位毫秒级时间戳,
