@@ -1,14 +1,6 @@
 # Web API设计说明
 
-
-
 ## Done
-
-### 用户部分
-
-
-
-## Todo
 
 ### 用户部分
 
@@ -112,6 +104,10 @@ url：/api/user/login
 }
 ```
 
+
+
+## Todo
+
 #### 地址管理
 
 ##### 查询所有地址
@@ -134,7 +130,8 @@ url：/api/user/address/queryall
 [
     {
         "id":1,
-        "receiverUsername":"Y2hlbmdmZW5nZ3Vp",
+        "accountUsername":"Y2hlbmdmZW5nZ3Vp",
+      	"receiverName":"钟源",
         "province":"湖北",
         "city":"武汉",
         "addressDetatil":"湖北省武汉市武汉大学信息学部",
@@ -182,10 +179,11 @@ url：/api/user/address/add
 ```json
 {
     "id":1,
-    "receiverUsername":"Y2hlbmdmZW5nZ3Vp",
+    "accountUsername":"Y2hlbmdmZW5nZ3Vp",
+  	"receiverName":"钟源",
     "province":"湖北",
     "city":"武汉",
-    "addressDetatil":"湖北省武汉市武汉大学信息学部",
+    "addressDetail":"湖北省武汉市武汉大学信息学部",
     "addressLon":120,
     "addressLat":35,
     "phoneNum":18230152013
@@ -240,10 +238,11 @@ url：/api/user/address/edit
 ```json
 {
     "id":1,
-    "receiverUsername":"Y2hlbmdmZW5nZ3Vp",
+    "accountUsername":"Y2hlbmdmZW5nZ3Vp",
+  	"receiverName":"钟源",
     "province":"湖北",
     "city":"武汉",
-    "addressDetatil":"湖北省武汉市武汉大学信息学部",
+    "addressDetail":"湖北省武汉市武汉大学信息学部",
     "addressLon":120,
     "addressLat":35,
     "phoneNum":18230152013
@@ -256,5 +255,74 @@ url：/api/user/address/edit
 {
     "ifSuccess":true
 }
+```
+
+### 订单部分
+
+##### 查询所有订单
+
+类型：GET
+
+url: /api/user/order/queryAll
+
+说明：根据用户名查询所有订单
+
+参数：username
+
+示例：
+
+- url: /api/user/order/queryall?username=Y2hlbmdmZW5nZ3Vp
+
+- 附带json：无
+- 回送：
+
+```json
+[{
+  	"orderId":"160834798171871",
+  	"goodDescription":"爱疯12",
+  	"receiver":{
+      	"username":"Y2hlbmdmZW5nZ3Vp",
+      	"name":"钟源",			// 此为登录账户的名称
+      	"address":{
+          	"receiverName":"ypy",		// 此为收货人的名称
+          	"phoneNum":"18186113076",
+          	"province":"湖北省",
+          	"city":"武汉市"，
+          	"addressDetail":"信息学部",
+          	"addressLon":114.366293,
+          	"addressLat":30.535219,
+        }
+    },
+  	"deliver":{
+      	"username":"Y2hlbmdmZW5nZ3Vp",		// 此为卖家的用户名,
+      	"name":"淘宝卖家1",
+      	"phoneNum":"13025612302",
+      	"province":"四川省",
+      	"city":"成都市",
+      	"addressDetail":"宽窄巷子",
+      	"addressLon":113.345331,
+      	"addressLat":30.120412,
+    },
+  	"route":[
+      	// 此部分为路由信息，需根据派送路径进行排序
+      	{
+          	"id":1,
+          	"province":"四川省",
+          	"city":"成都市",
+          	"addressDetail":"宽窄巷子韵达快递",
+          	"nodeLon":113.123435,
+          	"nodeLat":30.123432
+          	"ifFull":false,
+          	"arrivingTime":"1608347981718",		// 13位毫秒级时间戳
+          	"leavingTime":"1608347981718",		// 13位毫秒级时间戳
+        }
+    ]
+  	"entryTime":"1608347981718"		// 13位毫秒级时间戳,
+  	"callbackState":0,
+  	"orderState":0,
+  	"desChangedTimes":0
+},{
+  	......
+}]
 ```
 
