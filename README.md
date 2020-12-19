@@ -311,13 +311,13 @@ url: /api/user/order/queryAll
           	"city":"成都市",
           	"addressDetail":"宽窄巷子韵达快递",
           	"nodeLon":113.123435,
-          	"nodeLat":30.123432
+          	"nodeLat":30.123432,
           	"ifFull":false,
           	"arrivingTime":"1608347981718",		// 13位毫秒级时间戳
           	"leavingTime":"1608347981718",		// 13位毫秒级时间戳
         }
-    ]
-  	"entryTime":"1608347981718"		// 13位毫秒级时间戳,
+    ],
+  	"entryTime":"1608347981718",		// 13位毫秒级时间戳,
   	"callbackState":0,
   	"orderState":0,
   	"desChangedTimes":0
