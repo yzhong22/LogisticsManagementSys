@@ -277,56 +277,22 @@ url: /api/user/order/queryAll
 - 回送：
 
 ```json
-[{
-  	"orderId":"160834798171871",
-  	"goodDescription":"爱疯12",
-  	"receiver":{
-      	"username":"Y2hlbmdmZW5nZ3Vp",
-      	"name":"钟源",			// 此为登录账户的名称
-      	"address":{
-          	"receiverName":"ypy",		// 此为收货人的名称
-          	"phoneNum":"18186113076",
-          	"province":"湖北省",
-          	"city":"武汉市",
-          	"addressDetail":"信息学部",
-          	"addressLon":114.366293,
-          	"addressLat":30.535219,
-        }
-    },
-  	"deliver":{
-      	"username":"Y2hlbmdmZW5nZ3Vp",		// 此为卖家的用户名,
-      	"name":"淘宝卖家1",
-      	"phoneNum":"13025612302",
-      	"province":"四川省",
-      	"city":"成都市",
-      	"addressDetail":"宽窄巷子",
-      	"addressLon":113.345331,
-      	"addressLat":30.120412,
-    },
-  	"route":[
-      	// 此部分为路由信息，需根据派送路径进行排序
-      	{
-          	"id":1,
-          	"province":"四川省",
-          	"city":"成都市",
-          	"addressDetail":"宽窄巷子韵达快递",
-          	"nodeLon":113.123435,
-          	"nodeLat":30.123432,
-          	"ifFull":false,
-          	"arrivingTime":"1608347981718",		// 13位毫秒级时间戳
-          	"leavingTime":"1608347981718",		// 13位毫秒级时间戳
-        },
-      	{
-          	......
-        }
-    ],
-  	"entryTime":"1608347981718",		// 13位毫秒级时间戳,
+[
+  {
+    "id":"160834798171871",
+    "accountUsername":"Y2hlbmdmZW5nZ3Vp",		// 此为登录账户的名称
+    "goodDescription":"爱疯12",
+    "receiverName":"钟源",		// 收货人姓名
+    "deliverName":"淘宝卖家1",
+    "addressDetail":"武汉大学信息学部",
+    "entryTime":"1608347981718",		// 13位毫秒级时间戳,
   	"callbackState":0,
   	"orderState":0,
   	"desChangedTimes":0
-},{
-  	......
-}]
+  },{
+    // ......
+  }
+}
 ```
 
 
