@@ -287,7 +287,7 @@ url: /api/user/order/queryAll
           	"receiverName":"ypy",		// 此为收货人的名称
           	"phoneNum":"18186113076",
           	"province":"湖北省",
-          	"city":"武汉市"，
+          	"city":"武汉市",
           	"addressDetail":"信息学部",
           	"addressLon":114.366293,
           	"addressLat":30.535219,
