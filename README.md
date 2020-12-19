@@ -286,9 +286,9 @@ url: /api/user/order/queryAll
     "deliverName":"淘宝卖家1",
     "addressDetail":"武汉大学信息学部",
     "entryTime":"1608347981718",		// 13位毫秒级时间戳,
-  	"callbackState":0,
-  	"orderState":0,
-  	"desChangedTimes":0
+    "callbackState":0,
+    "orderState":0,
+    "desChangedTimes":0
   },{
     // ......
   }
