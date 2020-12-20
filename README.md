@@ -292,7 +292,7 @@ url: /api/user/order/queryAll
   },{
     // ......
   }
-}
+]
 ```
 
 

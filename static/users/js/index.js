@@ -11,7 +11,7 @@ let app = new Vue({
             username: ""
         },
         address: {
-            all: [{addressDetail: "当代国际花园", receiverName: "钟源", phoneNum: "18186113076"}],
+            all: [{id: 1, addressDetail: "当代国际花园", receiverName: "钟源", phoneNum: "18186113076"}],
             current: {},
             temporal_coor: {},  // 选择的经纬度暂存于此
             search_keyword: '',
@@ -210,6 +210,7 @@ let app = new Vue({
             } catch (e) {
                 return 0;
             }
+
             this.address.edit_mode = false;
             this.address.addVisible = true;
         },
