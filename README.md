@@ -108,7 +108,7 @@ url：/api/user/login
 
 ## Todo
 
-#### 地址管理
+### 地址管理
 
 ##### 查询所有地址
 
@@ -284,11 +284,12 @@ url: /api/user/order/queryAll
     "goodDescription":"爱疯12",
     "receiverName":"钟源",		// 收货人姓名
     "deliverName":"淘宝卖家1",
-    "addressDetail":"武汉大学信息学部",
+    "addressDetail":"湖北省武汉市武汉大学",	// 这里要带有省市信息，可能需要字符串拼接
     "entryTime":"1608347981718",		// 13位毫秒级时间戳,
     "callbackState":0,
     "orderState":0,
-    "desChangedTimes":0
+    "desChangedTimes":0,
+    "receivingOption":1
   },{
     // ......
   }
@@ -297,13 +298,48 @@ url: /api/user/order/queryAll
 
 
 
-##### 查询某一订单的详细信息
+##### 添加订单
+
+类型：POST
+
+url: /api/user/order/add
+
+说明：添加订单信息，但不生成路径
+
+参数：username
+
+示例：
+
+- url: /api/user/order/add?username=Y2hlbmdmZW5nZ3Vp
+- 附带json：
+
+```json
+{
+  "id":"160834798171871",
+  "receiverAddressId":1,
+  "deliverUsername":"Y2hlbmdmZW5nZ3Vp"	// 卖家用户名
+  "goodDescription":"爱疯12",
+  "receivingOption":0
+}
+```
+
+- 回送：
+
+```json
+{
+  "ifSuccess":true
+}
+```
+
+
+
+##### 查询某一订单的路由信息
 
 类型：GET
 
 url: /api/user/order/showCertainOrder
 
-说明：根据特性信息查询订单的详细信息
+说明：根据特性信息查询订单的路由信息
 
 参数：username, orderId
 
@@ -322,7 +358,6 @@ url: /api/user/order/showCertainOrder
     "name":"钟源",			// 此为登录账户的名称
     "address":{
       "receiverName":"ypy",		// 此为收货人的名称
-      "phoneNum":"18186113076",
       "province":"湖北省",
       "city":"武汉市",
       "addressDetail":"信息学部",
@@ -333,34 +368,123 @@ url: /api/user/order/showCertainOrder
   "deliver":{
     "username":"Y2hlbmdmZW5nZ3Vp",		// 此为卖家的用户名,
     "name":"淘宝卖家1",
-    "phoneNum":"13025612302",
     "province":"四川省",
     "city":"成都市",
     "addressDetail":"宽窄巷子",
     "addressLon":113.345331,
     "addressLat":30.120412,
   },
-  "route":[
-    // 此部分为路由信息，需根据派送路径进行排序
-    {
-      "id":1,
-      "province":"四川省",
-      "city":"成都市",
-      "addressDetail":"宽窄巷子韵达快递",
-      "nodeLon":113.123435,
-      "nodeLat":30.123432,
-      "ifFull":false,
-      "arrivingTime":"1608347981718",		// 13位毫秒级时间戳
-      "leavingTime":"1608347981718",		// 13位毫秒级时间戳
-    },
-    {
-      // ......
-    }
-  ],
-  "entryTime":"1608347981718",		// 13位毫秒级时间戳,
-  "callbackState":0,
-  "orderState":0,
-  "desChangedTimes":0
+  "route":{
+    "node":[
+      // 此部分为路由信息，需根据派送路径进行排序，方便地图可视化显示
+      {
+        "id":1,
+        "province":"四川省",
+        "city":"成都市",
+        "addressDetail":"宽窄巷子韵达快递",
+        "nodeLon":113.123435,
+        "nodeLat":30.123432,
+        "arrivingTime":"1608347981718",		// 13位毫秒级时间戳
+        "leavingTime":"1608347981718",		// 13位毫秒级时间戳
+      },
+      {
+        // ......
+      }
+    ],
+    // 下面是时间线描述信息，需要根据路径等节点信息生成
+    "deliverInfo":[
+      // 订单创建的时间entryTime
+      {
+        "content":"商品已下单",
+        "timestamp":"2020/4/13  22:14",
+        "event":"create"
+      },
+      // 卖家发货的时间，即第一个node的arrivingTime
+      {
+        "content":"卖家已发货",
+        "timestamp":"2020/4/14  5:27",
+        "event":"sendOut"
+      },
+      // 到达第一个节点
+      {
+        "content":"【成都市】您的快递已到达【xxx快递公司】",
+        "timestamp":"2020/4/14  5:27",
+        "event":"normal"
+      },
+      // 由节点送出
+      {
+        "content":"【成都市】xxx快递公司 已发出",
+        "timestamp":"2020/4/14  6:27",
+        "event":"normal"
+      },
+      // 到达最后一个节点
+      {
+        "content":"已到达 xxx快递公司",
+        "timestamp":"2020/4/16  16:27",
+        "event":"arrive"
+      },
+      // 如果是选择自己上门收取
+      {
+        "content":"【代收点】您的快递已暂存于 xxx快递公司，地址：xxxx，请及时领取",
+        "timestamp":"2020/4/16  16:27",
+        "event":"fetch"
+      },
+      // 第三方派送员揽件
+      {
+        "content":"【派送中】您的快递正由 xxx骑手进行派送，联系方式：xxxx，请注意查收",
+        "timestamp":"2020/4/16  18:23",
+        "event":"dispatch"
+      },
+      // 快递查收
+      {
+        "content":"您的快递已确认查收",
+        // 对应finishTime
+        "timestamp":"2020/4/16  20:54",
+        "event":"finish"
+      },
+      // 下面是特殊情况
+      // 若用户发起退货申请，则订单到达下一节点后，便显示退货信息，后续返回节点路由信息不显示，最后快递到达起始节点并且卖家确认收货后，显示完成信息
+      {
+        "content":"进入退货流程",
+        "timestamp":"2020/4/15  17:43",
+        "event":"callback"
+      },
+      // 更改地址时只涉及到路由的更新，这里不额外显示
+    ]
+  }
+}
+```
+
+
+
+## 卖家部分
+
+##### 查询所有卖家
+
+类型：GET
+
+url: /api/user/seller/queryAll
+
+说明：查询所有卖家
+
+参数：无
+
+示例：
+
+- url: /api/user/order/queryAll
+- 附带json：无
+- 回送：
+
+```json
+{
+  "username":"Y2hlbmdmZW5nZ3Vp",
+  "province":"湖北省",
+  "city":"武汉市",
+  "name":"钟源",
+  "addressDetail":"武汉大学文理学部",
+  "addressLon":113.123435,
+  "addressLat":30.123432,
+  "phoneNum":18211031231
 }
 ```
 
