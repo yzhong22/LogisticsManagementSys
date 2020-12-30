@@ -10,12 +10,13 @@ const validatePass = (rule, value, callback) => {
 
 
 vue = new Vue({
-    el: "#user_register",
+    el: "#register",
     data: {
         register_form: {
             username: "",
             keyword: "",
             checkpass: "",
+            phoneNum: "",
             name: ""
         },
         register_rules: {
@@ -32,6 +33,9 @@ vue = new Vue({
             ],
             name: [
                 {required: true, message: '请输入姓名', trigger: 'change'}
+            ],
+            phoneNum: [
+                {required: true, message: '请输入电话号码', trigger: 'change'}
             ]
         }
     },

@@ -48,30 +48,48 @@ let app = new Vue({
             temporal_coor: {},  // 选择的经纬度暂存于此
             search_keyword: '',
             map: 0,
-            mapInfo: {
+            routeMapInfo: {
                 center: {lng: 114.372042, lat: 30.544861},
                 zoom: 16
             },
             addVisible: false,
             mapVisible: false,
-            tobereceived_orders: [],
             rules: {
-                province: [
-                    {required: true, message: '请输入省份', trigger: 'change'},
+                receiverAddressId: [
+                    {required: true, message: '请选择收货地址', trigger: 'change'},
                 ],
-                city: [
-                    {required: true, message: '请输入市区', trigger: 'change'},
+                deliverUsername: [
+                    {required: true, message: '请选择卖家', trigger: 'change'},
                 ],
-                addressDetail: [
-                    {required: true, message: '请输入详细地址', trigger: 'change'},
-                ],
-                phoneNum: [
-                    {required: true, message: '请输入联系方式', trigger: 'change'},
+                goodDescription: [
+                    {required: true, message: '请输入货物信息', trigger: 'change'},
                 ],
             }
         },
+        unfinishedOrder: {
+            all: [{id: "12321", deliverName: "nihao", orderState: 1},
+                {id: "13621", deliverName: "nihaoa", orderState: 4},
+                {id: "13622", deliverName: "自取", orderState: 2, receivingOption: 1},
+                {id: "13623", deliverName: "派送", orderState: 2, receivingOption: 0}],
+            map: 0,
+            BMap: 0,
+            orderNum: 2,
+            routeMapInfo: {
+                center: {lng: 114.372042, lat: 30.544861},
+                zoom: 16
+            },
+            mapVisible: false,
+        },
+        mapOrder: {
+            map: 0,
+            BMap: 0,
+            mapInfo: {
+                center: {lng: 114.372042, lat: 30.544861},
+                zoom: 16
+            },
+        },
         seller: {
-            all: [{username: "哈哈哈", name: "你好", city: "武汉"}]
+            all: [{username: "哈哈哈", name: "你好", city: "武汉市", province: "湖北省"}]
         },
 
     },
@@ -226,21 +244,43 @@ let app = new Vue({
 
         },
         order_add() {
-            this.order.current = {};
+            this.order.current = {receivingOption: "0"};
             let timestamp = (new Date()).valueOf();
             let random_num = Math.floor(Math.random() * 100);
             this.order.current.id = timestamp.toString() + random_num.toString();
 
             this.order.addVisible = true;
         },
+        submitNewOrder(form) {
+            this.$refs[form].validate((valid) => {
+                if (valid) {
+                    console.log(this.order.current);
+                } else {
+                    return false;
+                }
+            });
+        },
         order_refresh() {
 
         },
         order_check_if_changeable(order) {
+            if (order.orderState < 2 && order.desChangedTimes == 0) {
+                return false;
+            } else {
+                return true;
+            }
+        },
+
+        // 待收货订单部分
+        unfinishedOrder_btnCommand(command) {
 
         },
-        order_check_if_returnable(order) {
-
+        // 地图显示部分
+        // 地图初始化时调用
+        mapOrder_mapHandler({BMap, map}) {
+            this.mapOrder.map = map;   //将map变量存储在全局
+            this.mapOrder.BMap = BMap;
+            let myGeo = new BMap.Geocoder();
         },
     }
 });

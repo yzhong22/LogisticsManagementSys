@@ -1,0 +1,55 @@
+body {
+    background-color: #B0E0E6;
+}
+
+.container {
+    display: inline-block;
+    position: relative;
+    margin-top: 5%;
+    width: 100%;
+}
+
+.register_card {
+    float: left;
+    position: relative;
+    width: 30%;
+    left: 35%;
+}
+
+.form {
+    padding: 0 10px 0 10px;
+}
+
+.register_btn {
+    width: 100%;
+    font-size: 15px;
+}
+
+.icon {
+    width: 50px;
+    height: 50px
+}
+
+.header {
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.btn_line {
+    margin-top: 33px;
+    margin-bottom: 3px;
+}
+
+.already_have {
+    font-size: 6px;
+    margin-right: 15px;
+    margin-left: 41%;
+}
+
+h2 {
+    margin: 0 0 0 25px;
+    position: absolute;
+    top: 10%;
+    display: inline-block;
+}
+
