@@ -39,7 +39,28 @@ vue = new Vue({
         onSubmit: function (form) {
             this.$refs[form].validate((valid) => {
                 if (valid) {
-                    alert(this.register_form.username);
+                    let data = {
+                        username: Base64.encode(this.register_form.username),
+                        keyword: Base64.encode(this.register_form.keyword),
+                        name: Base64.encode(this.register_form.name)
+                    };
+                    axios.post('/api/user/register', data)
+                        .then(response => {
+                            if (response.data.ifExist == false) {
+                                this.$message({
+                                    message: '注册成功！即将为您跳转登录界面',
+                                    type: 'success'
+                                });
+                                window.setTimeout("window.location='/users/login'",2000);
+                                // self.location="/users/login"
+                            } else {
+                                this.register_form.username="";
+                                this.$message({
+                                    message: '该用户名已存在！',
+                                    type: 'warning'
+                                });
+                            }
+                        })
                 } else {
                     return false;
                 }

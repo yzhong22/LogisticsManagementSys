@@ -1,4 +1,5 @@
 import base64
+import psycopg2
 
 
 # 解密方法

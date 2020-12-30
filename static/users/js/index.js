@@ -7,7 +7,7 @@ let app = new Vue({
     data: {
         default_active: "1",
         login_user: {
-            name: "钟源",
+            name: "",
             username: ""
         },
         address: {
@@ -123,7 +123,6 @@ let app = new Vue({
         },
         // 用户旁设置键对应方法
         handle_command(command) {
-            console.log(command);
             switch (command) {
                 case("1"):
                     break;
@@ -134,7 +133,6 @@ let app = new Vue({
                     break;
             }
         },
-
         // 地址部分
         address_addoverlay(lng, lat) {
             var myMarker = new BMap.Marker(new BMap.Point(lng, lat));
@@ -285,5 +283,25 @@ let app = new Vue({
     }
 });
 
-app.handle_select(app.default_active, "");
+function getUrlParam(name) {
+    //构造一个含有目标参数的正则表达式对象
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+    //匹配目标参数
+    var r = window.location.search.substr(1).match(reg);
+    //返回参数
+    if (r != null) {
+        return unescape(r[2]);
+    } else {
+        return null;
+    }
+}
+
+function onBegin() {
+    app.login_user.username = Base64.decode(getUrlParam("username"));
+    app.login_user.name = Base64.decode(getUrlParam("name"));
+
+    app.handle_select(app.default_active, "");
+}
+
+onBegin()
 
