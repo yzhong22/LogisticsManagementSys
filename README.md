@@ -104,11 +104,7 @@ url：/api/user/login
 }
 ```
 
-
-
-## Todo
-
-### 地址管理
+#### 地址管理
 
 ##### 查询所有地址
 
@@ -126,12 +122,12 @@ url：/api/user/address/queryall
 - 附带json：无
 - 回送：
 
-```json
+```
 [
     {
         "id":1,
         "accountUsername":"Y2hlbmdmZW5nZ3Vp",
-      	"receiverName":"钟源",
+        "receiverName":"钟源",
         "province":"湖北",
         "city":"武汉",
         "addressDetatil":"湖北省武汉市武汉大学信息学部",
@@ -176,11 +172,11 @@ url：/api/user/address/add
 - url: /api/user/address/add
 - 附带json：		
 
-```json
+```
 {
     "id":1,
     "accountUsername":"Y2hlbmdmZW5nZ3Vp",
-  	"receiverName":"钟源",
+    "receiverName":"钟源",
     "province":"湖北",
     "city":"武汉",
     "addressDetail":"湖北省武汉市武汉大学信息学部",
@@ -192,7 +188,7 @@ url：/api/user/address/add
 
 - 回送：
 
-```json
+```
 {
     "ifSucess":true
 }
@@ -214,7 +210,7 @@ url：/api/user/address/delete
 - 附带json：无
 - 回送：
 
-```json
+```
 {
     "ifSuccess":true
 }
@@ -235,11 +231,11 @@ url：/api/user/address/edit
 - url:/api/user/address/edit
 - 附带json：
 
-```json
+```
 {
     "id":1,
     "accountUsername":"Y2hlbmdmZW5nZ3Vp",
-  	"receiverName":"钟源",
+    "receiverName":"钟源",
     "province":"湖北",
     "city":"武汉",
     "addressDetail":"湖北省武汉市武汉大学信息学部",
@@ -251,13 +247,13 @@ url：/api/user/address/edit
 
 - 回送：
 
-```json
+```
 {
     "ifSuccess":true
 }
 ```
 
-### 订单部分
+#### 订单部分
 
 ##### 查询所有订单
 
@@ -331,7 +327,44 @@ url: /api/user/order/add
 }
 ```
 
+### 卖家部分
 
+##### 查询所有卖家
+
+类型：GET
+
+url: /api/user/seller/queryAll
+
+说明：查询所有卖家
+
+参数：无
+
+示例：
+
+- url: /api/user/order/queryAll
+- 附带json：无
+- 回送：
+
+```json
+{
+  "username":"Y2hlbmdmZW5nZ3Vp",
+  "province":"湖北省",
+  "city":"武汉市",
+  "name":"钟源",
+  "addressDetail":"武汉大学文理学部",
+  "addressLon":113.123435,
+  "addressLat":30.123432,
+  "phoneNum":18211031231
+}
+```
+
+
+
+## Todo
+
+### 用户部分
+
+#### 订单部分
 
 ##### 查询某一订单的路由信息
 
@@ -457,34 +490,90 @@ url: /api/user/order/showCertainOrder
 
 
 
-## 卖家部分
-
-##### 查询所有卖家
+##### 查询未完成订单的数量
 
 类型：GET
 
-url: /api/user/seller/queryAll
+url: /api/user/order/unfinished/num
 
-说明：查询所有卖家
+说明：根据用户订单的orderState字段，获取特定用户所有未完成订单的数量
 
-参数：无
+参数：username
 
 示例：
 
-- url: /api/user/order/queryAll
+- url: /api/user/order/unfinished/num?username=Y2hlbmdmZW5nZ3Vp
 - 附带json：无
 - 回送：
 
 ```json
 {
-  "username":"Y2hlbmdmZW5nZ3Vp",
-  "province":"湖北省",
-  "city":"武汉市",
-  "name":"钟源",
-  "addressDetail":"武汉大学文理学部",
-  "addressLon":113.123435,
-  "addressLat":30.123432,
-  "phoneNum":18211031231
+  "orderNum":12
+}
+```
+
+
+
+##### 根据关键词查询订单
+
+类型：GET
+
+url：/api/user/order/query
+
+说明：根据关键词，搜索 发货人/地址信息/货物 中包含相应字段的订单记录
+
+参数：username, search_keyword
+
+示例：
+
+- url: /api/user/order/query?username=Y2hlbmdmZW5nZ3Vp&&search_keyword=武汉大学
+- 附带json：无
+- 回送：如查询所有订单API
+
+
+
+##### 确认收货
+
+类型：GET
+
+url: /api/user/order/confirmReceiving
+
+说明：根据订单编号，将订单orderState更改为5
+
+参数：id（订单编号）
+
+示例：
+
+- url: /api/user/order/confirmReceiving?id=2012392104
+- 附带json：无
+- 回送：无
+
+
+
+##### 申请退货
+
+类型：GET
+
+url: /api/user/order/callback/apply
+
+说明：用户发送订单退货申请
+
+参数：id（订单编号）
+
+示例：
+
+- url: /api/user/order/callback/apply?id=2012392104
+- 附带json：无
+- 回送：
+
+```json
+{
+  "ifSuccess":true
+}
+// 或者检验已不能申请退货（orderState>=2）
+{
+  "ifSuccess":true,
+  "content":"xxx"	// 向用户进行提示
 }
 ```
 
