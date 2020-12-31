@@ -75,3 +75,8 @@ def user_login_check():
 @app.route('/seller/register')
 def seller_register():
     return render_template('seller/register.html')
+
+# 返回卖家主页
+@app.route('/seller')
+def seller_index():
+    return render_template('seller/index.html')

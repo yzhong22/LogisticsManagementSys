@@ -2,9 +2,370 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>放心递·卖家管理</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/theme.png') }}">
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='seller/css/index.css') }}">
 </head>
 <body>
+<el-container id="app" class="container">
+    <el-header class="header">
+        <div class="title">
+            <svg t="1608088953057" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                 xmlns="http://www.w3.org/2000/svg" p-id="7787" data-spm-anchor-id="a313x.7781069.0.i3" width="200"
+                 height="200">
+                <path d="M512 1024a512 512 0 1 1 512-512 512 512 0 0 1-512 512zM204.8 663.098514s4.388571 32.709486 14.511543 43.008a164.161829 164.161829 0 0 0 28.862171 21.035886l207.316115 57.724343a61.264457 61.264457 0 0 0 23.405714 3.203657 9.172114 9.172114 0 0 0 3.437714-9.537829V439.793371L204.8 362.554514v300.544z m0-331.8784l298.1888 82.183315 117.3504-32.329143-299.549257-82.563657z m314.719086-79.520914a119.442286 119.442286 0 0 0-16.384-2.925714 121.490286 121.490286 0 0 0-16.822857 3.189028l-86.952229 24.429715 300.500114 82.812342 101.566172-27.984457z m282.9312 379.845486V362.554514h-0.087772l-88.020114 24.4736v130.530743l-58.031543 16.003657v-130.369828l-132.534857 36.893257v310.842514a131.101257 131.101257 0 0 0 3.072 36.673829c3.8912 5.646629 23.186286-2.282057 23.186286-2.282057l186.294857-51.843658a155.384686 155.384686 0 0 0 53.774628-25.234285c14.467657-14.716343 12.346514-76.6976 12.346515-76.6976z"
+                      fill="#1A8EFF" p-id="7788"></path>
+            </svg>
+            <p class="header_title">放心递·卖家管理</p>
+        </div>
+        <div class="user_info">
+            <el-dropdown @command="handle_command">
+                <i class="el-icon-setting"></i>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="1">修改密码</el-dropdown-item>
+                    <el-dropdown-item command="2">注销登录</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+            <span class='welcome_txt' v-text="'欢迎您，'+login_user.name"></span>
+            <el-avatar :size="40"
+                       src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
+                       class="evatar"></el-avatar>
+        </div>
+    </el-header>
+    <div class="divider"></div>
+    <el-container height="70%">
+        <el-aside class="side">
+            <el-menu
+                    :default-active="default_active"
+                    class="menu el-menu-vertical-demo"
+                    @select="handle_select">
+                <el-menu-item index="1">
+                    <i class="el-icon-s-promotion"></i>
+                    <span slot="title">发货管理</span>
+                </el-menu-item>
+                <el-menu-item index="2">
+                    <i class="el-icon-s-order"></i>
+                    <span slot="title">所有订单</span>
+                </el-menu-item>
+                <el-menu-item index="3">
+                    <i class="el-icon-menu"></i>
+                    <span slot="title">退货审批</span>
+                </el-menu-item>
+            </el-menu>
+        </el-aside>
+        <el-main class="main">
+            <!-- 发货管理模块 -->
+            <div id="sending_manage">
+                <p class="main_header">发货管理</p>
+                <el-row class="search_row">
+                    <el-col :xs="24" :md="12">
+                        <el-input placeholder="请输入条件" v-model="send.search_keyword" class="input-with-select">
+                            <el-button slot="append" icon="el-icon-search" @click="send_query()"></el-button>
+                        </el-input>
+                    </el-col>
+                    <el-col :xs="24" :md="6" style="margin-left: 30px">
+                        <el-button-group>
+                            <el-button icon="el-icon-refresh-left" @click="send_setRoute(this)"></el-button>
+                        </el-button-group>
+                    </el-col>
+                </el-row>
+                <el-table
+                        :data="send.all"
+                        class="content-table"
+                        :fit="true"
+                        :show-header="true"
+                        height="470">
+                    <el-table-column
+                            fixed="left"
+                            prop="id"
+                            label="订单编号"
+                            width="160"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="receiverName"
+                            label="收货人姓名"
+                            width="180"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="goodDescription"
+                            label="货物信息"
+                            width="200"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="receiverAddress"
+                            label="收货人地址"
+                            width="350"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column label="操作" fixed="right" width="200px">
+                        <template slot-scope="scope">
+                            <el-button mc-type="column-el-button" size="mini" type="primary"
+                                       @click="send_setRoute(scope.row)">编辑
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
 
+                <!--发货对话框-->
+                <el-dialog title="选择发货地址" :visible.async="send.addVisible" width="60%"
+                           @close="send.addVisible=false" style="margin-top: -6%">
+                    <el-form label-width="10%" :model="send.current" ref="send.current" class="demo-ruleForm"
+                             style="margin-bottom: -30px">
+                        <el-form-item label="发货地址">
+                            <el-select v-model="send.current.sending_nodeId" placeholder="请选择发货地址" filterable
+                                       style="width:60%">
+                                <el-option
+                                        v-for="item in send.sending_options"
+                                        :key="item.id"
+                                        :label="item.address"
+                                        :value="item.id">
+                                    <span style="float: left" v-text="item.address"></span>
+                                    <span style="float: right; color: #8492a6; font-size: 13px"
+                                          v-text="item.distance"></span>
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="发货方式">
+                            <el-radio-group v-model="send.current.sending_way">
+                                <el-radio label="1">服务点投递</el-radio>
+                                <el-radio label="2">第三方骑手上门取件</el-radio>
+                            </el-radio-group>
+                        </el-form-item>
+                        <templete style="margin-top:-30px">
+                            <baidu-map id="send_map" :center="send.mapInfo.center"
+                                       :zoom="send.mapInfo.zoom" :scroll-wheel-zoom="true" @ready="send_mapHandler"
+                                       ak="MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd">
+                                <bm-info-window :position="send.nearest_points[0].position"
+                                                :show="send.nearest_points[0].show"
+                                                @close="send.nearest_points[0].show=false">
+                                    <p v-text="send.nearest_points[0].address"></p>
+                                    <el-button id="send_windowBtn_0" @click="send_chosen_address($event)" size="mini">
+                                        确定
+                                    </el-button>
+                                </bm-info-window>
+                                <bm-info-window :position="send.nearest_points[1].position"
+                                                :show="send.nearest_points[1].show"
+                                                @close="send.nearest_points[1].show=false">
+                                    <p v-text="send.nearest_points[1].address"></p>
+                                    <el-button id="send_windowBtn_1" @click="send_chosen_address($event)" size="mini">
+                                        确定
+                                    </el-button>
+                                </bm-info-window>
+                                <!--                                <bm-info-window :position="send.nearest_points[2].position"-->
+                                <!--                                                :show="send.nearest_points[2].show"-->
+                                <!--                                                @close="send.nearest_points[2].show=false">-->
+                                <!--                                    <p v-text="send.nearest_points[2].address"></p>-->
+                                <!--                                    <el-button id="send_windowBtn_2" @click="send_chosen_address($event)" size="mini">-->
+                                <!--                                        确定-->
+                                <!--                                    </el-button>-->
+                                <!--                                </bm-info-window>-->
+                                <!--                                <bm-info-window :position="send.nearest_points[3].position"-->
+                                <!--                                                :show="send.nearest_points[3].show"-->
+                                <!--                                                @close="send.nearest_points[3].show=false">-->
+                                <!--                                    <p v-text="send.nearest_points[3].address"></p>-->
+                                <!--                                    <el-button id="send_windowBtn_3" @click="send_chosen_address($event)" size="mini">-->
+                                <!--                                        确定-->
+                                <!--                                    </el-button>-->
+                                <!--                                </bm-info-window>-->
+                                <!--                                <bm-info-window :position="send.nearest_points[4].position"-->
+                                <!--                                                :show="send.nearest_points[4].show"-->
+                                <!--                                                @close="send.nearest_points[4].show=false">-->
+                                <!--                                    <p v-text="send.nearest_points[4].address"></p>-->
+                                <!--                                    <el-button id="send_windowBtn_4" @click="send_chosen_address($event)" size="mini">-->
+                                <!--                                        确定-->
+                                <!--                                    </el-button>-->
+                                <!--                                </bm-info-window>-->
+                            </baidu-map>
+                        </templete>
+                        <el-form-item style="text-align: right;margin-top: 20px">
+                            <el-button @click="send.addVisible=false" type="danger" icon="el-icon-close"
+                                       circle></el-button>
+                            <el-button @click="send_submit('send.current')" type="success" icon="el-icon-check"
+                                       circle :loading="send.loading"></el-button>
+                        </el-form-item>
+                    </el-form>
+
+
+                </el-dialog>
+            </div>
+            <!--            订单管理模块-->
+            <div id="all_order">
+                <!--                <p class="main_header">订单管理</p>-->
+                <!--                <el-row class="search_row">-->
+                <!--                    <el-col :xs="24" :md="12">-->
+                <!--                        <el-input placeholder="请输入条件" v-model="order.search_keyword" class="input-with-select">-->
+                <!--                            <el-button slot="append" icon="el-icon-search" @click="order_query()"></el-button>-->
+                <!--                        </el-input>-->
+                <!--                    </el-col>-->
+                <!--                    <el-col class="address_search_btn" :xs="24" :md="12" v-if="true">-->
+                <!--                        <el-button-group style="margin-left: 40px">-->
+                <!--                            <el-button @click="order_add()" icon="el-icon-circle-plus-outline"></el-button>-->
+                <!--                            <el-button @click="order_refresh()" icon="el-icon-refresh-left"></el-button>-->
+                <!--                        </el-button-group>-->
+                <!--                    </el-col>-->
+                <!--                </el-row>-->
+                <!--                <el-table-->
+                <!--                        :data="order.all"-->
+                <!--                        class="content-table"-->
+                <!--                        :fit="true"-->
+                <!--                        :show-header="true"-->
+                <!--                        height="470">-->
+                <!--                    <el-table-column-->
+                <!--                            fixed="left"-->
+                <!--                            prop="id"-->
+                <!--                            label="订单ID"-->
+                <!--                            width="150"-->
+                <!--                            sortable>-->
+                <!--                    </el-table-column>-->
+                <!--                    <el-table-column-->
+                <!--                            prop="deliverName"-->
+                <!--                            label="发货人"-->
+                <!--                            width="150"-->
+                <!--                            sortable>-->
+                <!--                    </el-table-column>-->
+                <!--                    <el-table-column-->
+                <!--                            prop="addressDetail"-->
+                <!--                            label="地址信息"-->
+                <!--                            width="350"-->
+                <!--                            sortable>-->
+                <!--                    </el-table-column>-->
+                <!--                    <el-table-column-->
+                <!--                            prop="goodDescription"-->
+                <!--                            label="货物"-->
+                <!--                            width="250">-->
+                <!--                    </el-table-column>-->
+                <!--                    <el-table-column-->
+                <!--                            prop="orderState"-->
+                <!--                            label="订单状态"-->
+                <!--                            width="140">-->
+                <!--                    </el-table-column>-->
+                <!--                    <el-table-column label="操作" fixed="right" width="200px">-->
+                <!--                        <template slot-scope="scope">-->
+                <!--                            <el-button mc-type="column-el-button" size="mini"-->
+                <!--                                       @click="order_showRoute(scope.row)">查看路由-->
+                <!--                            </el-button>-->
+                <!--                            <el-button mc-type="column-el-button" size="mini" type="primary"-->
+                <!--                                       @click="order_confirmReceive(scope.row)">确认收货-->
+                <!--                            </el-button>-->
+                <!--                        </template>-->
+                <!--                    </el-table-column>-->
+                <!--                </el-table>-->
+
+                <!--                &lt;!&ndash;添加事项对话框&ndash;&gt;-->
+                <!--                <el-dialog title="添加订单" :visible.async="order.addVisible" width="50%"-->
+                <!--                           @close="order.addVisible=false">-->
+                <!--                    <el-form label-width="18%" :model="order.current" ref="order.current" class="demo-ruleForm"-->
+                <!--                             :rules="order.rules">-->
+                <!--                        <el-form-item label="订单ID" prop="id">-->
+                <!--                            <el-input v-model="order.current.id" disabled></el-input>-->
+                <!--                        </el-form-item>-->
+                <!--                        <el-form-item label="收货地址" prop="receiverAddressId">-->
+                <!--                            <el-select v-model="order.current.receiverAddressId" placeholder="请选择收货地址" filterable-->
+                <!--                                       style="width: 100%">-->
+                <!--                                <el-option-->
+                <!--                                        v-for="item in address.all"-->
+                <!--                                        :key="item.id"-->
+                <!--                                        :label="item.addressDetail"-->
+                <!--                                        :value="item.id">-->
+                <!--                                    <span style="float: left" v-text="item.addressDetail"></span>-->
+                <!--                                    <span style="float: right; color: #8492a6; font-size: 13px;margin-left:5px"-->
+                <!--                                          v-text="item.phoneNum"></span>-->
+                <!--                                    <span style="float: right; color: #8492a6; font-size: 13px"-->
+                <!--                                          v-text="item.receiverName"></span>-->
+                <!--                                </el-option>-->
+                <!--                            </el-select>-->
+                <!--                        </el-form-item>-->
+                <!--                        <el-form-item label="选择卖家" prop="deliverUsername">-->
+                <!--                            <el-select v-model="order.current.deliverUsername" placeholder="请选择卖家" filterable-->
+                <!--                                       style="width:100%">-->
+                <!--                                <el-option-->
+                <!--                                        v-for="item in seller.all"-->
+                <!--                                        :key="item.username"-->
+                <!--                                        :label="item.name"-->
+                <!--                                        :value="item.username">-->
+                <!--                                    <span style="float: left" v-text="item.name"></span>-->
+                <!--                                    <span style="float: right; color: #8492a6; font-size: 13px"-->
+                <!--                                          v-text="item.city"></span>-->
+                <!--                                    <span style="float: right; color: #8492a6; font-size: 13px"-->
+                <!--                                          v-text="item.province"></span>-->
+                <!--                                </el-option>-->
+                <!--                            </el-select>-->
+                <!--                        </el-form-item>-->
+                <!--                        <el-form-item label="货物信息" prop="goodDescription">-->
+                <!--                            <el-input v-model="order.current.goodDescription" placeholder="请输入内容"></el-input>-->
+                <!--                        </el-form-item>-->
+                <!--                        <el-form-item label="第三方骑手派送">-->
+                <!--                            <el-switch-->
+                <!--                                    v-model="order.current.receivingOption"-->
+                <!--                                    active-color="#13ce66"-->
+                <!--                                    active-value=0-->
+                <!--                                    inactive-value=1>-->
+                <!--                            </el-switch>-->
+                <!--                        </el-form-item>-->
+                <!--                        <el-form-item style="text-align: right;">-->
+                <!--                            <el-button @click="order.addVisible=false" type="danger" icon="el-icon-close"-->
+                <!--                                       circle></el-button>-->
+                <!--                            <el-button @click="submitNewOrder('order.current')" type="success" icon="el-icon-check"-->
+                <!--                                       circle></el-button>-->
+                <!--                        </el-form-item>-->
+
+                <!--                    </el-form>-->
+                <!--                </el-dialog>-->
+
+                <!--                &lt;!&ndash; 地图显示时间框&ndash;&gt;-->
+                <!--                <el-dialog style="margin-top: -30px" title="地址选择" :visible.async="order.routeMapVisible" width="80%"-->
+                <!--                           @close="order.routeMapVisible=false">-->
+                <!--                    <templete style="margin-top:-30px">-->
+                <!--                        <baidu-map class="form_map" :center="address.mapInfo.center"-->
+                <!--                                   :zoom="address.mapInfo.zoom" @click="address_pointPick"-->
+                <!--                                   :scroll-wheel-zoom="true" @ready="address_mapHandler"-->
+                <!--                                   ak="MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd"></baidu-map>-->
+                <!--                    </templete>-->
+                <!--                    <el-row style="padding-top: 20px">-->
+                <!--                        <el-col :span="8">-->
+                <!--                            <el-input type="number" v-model.number="address.temporal_coor.addressLon"-->
+                <!--                                      placeholder="请在地图上点击以选择经度"-->
+                <!--                                      style="width: 100%;" disabled>-->
+                <!--                                <template slot="prepend">经度</template>-->
+                <!--                            </el-input>-->
+                <!--                        </el-col>-->
+                <!--                        <el-col :span="8" style="padding-left: 10px">-->
+                <!--                            <el-input type="number" v-model.number="address.temporal_coor.addressLat"-->
+                <!--                                      placeholder="请在地图上点击以选择纬度"-->
+                <!--                                      style="width: 100%;" disabled>-->
+                <!--                                <template slot="prepend">纬度</template>-->
+                <!--                            </el-input>-->
+                <!--                        </el-col>-->
+                <!--                        <el-button style="float: right;margin-left: 10px" type="success"-->
+                <!--                                   icon="el-icon-check"-->
+                <!--                                   circle></el-button>-->
+                <!--                        <el-button style="float:right" @click="address.mapVisible=false" type="danger"-->
+                <!--                                   icon="el-icon-close"-->
+                <!--                                   circle></el-button>-->
+                <!--                    </el-row>-->
+                <!--                </el-dialog>-->
+            </div>
+            <div id="callback">
+
+            </div>
+        </el-main>
+    </el-container>
+</el-container>
+<!--外部引入-->
+<script src="https://cdn.jsdelivr.net/npm/js-base64@3.6.0/base64.min.js"></script>
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/vue-baidu-map"></script>
+<!--<script src="https://api.map.baidu.com/api?v=1.0&ak=MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd"></script>-->
+
+<!--本地文件-->
+<script src="{{ url_for('static', filename='seller/js/index.js') }}"></script>
 </body>
 </html>
