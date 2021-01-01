@@ -381,35 +381,6 @@ url: /api/user/order/confirmReceiving
 - 附带json：无
 - 回送：无
 
-
-
-##### 申请退货
-
-类型：GET
-
-url: /api/user/order/callback/apply
-
-说明：用户发送订单退货申请
-
-参数：id（订单编号）
-
-示例：
-
-- url: /api/user/order/callback/apply?id=2012392104
-- 附带json：无
-- 回送：
-
-```json
-{
-  "ifSuccess":true
-}
-// 或者检验已不能申请退货（orderState>=2）
-{
-  "ifSuccess":true,
-  "content":"xxx"	// 向用户进行提示
-}
-```
-
 ### 卖家部分
 
 ##### 查询所有卖家
