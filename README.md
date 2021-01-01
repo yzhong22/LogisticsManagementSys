@@ -209,7 +209,7 @@ url: /api/seller/send/nearbyNodes
   
   // 返回本市所有的快递节点信息，供卖家选择
   // 这部分需要根据与卖家的距离进行排序（最近的排在第一个）
-  [{
+  "options":[{
     "id":123,	// 快递节点编号
     "address":"xxxxx韵达快递",
     "distance":"12米"		// 与卖家的距离
@@ -219,9 +219,9 @@ url: /api/seller/send/nearbyNodes
   
   // 下面返回与卖家最近的5个快递节点，供卖家可视化显示及选择
   // 这个就不用排序了
-  [{
+  "nearest_nodes":[{
     "id":123,
-    position: {
+    "position": {
       "lng": 114.372042,
       "lat": 30.544861
     }
