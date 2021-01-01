@@ -64,9 +64,9 @@ vue = new Vue({
                     myGeo.getPoint(this.register_form.addressDetail, function (point) {
                         if (point) {
                             let data = {
-                                username: Base64.encode(vue.register_form.username),
-                                keyword: Base64.encode(vue.register_form.keyword),
-                                name: Base64.encode(vue.register_form.name),
+                                username: URLSafeBase64.encode(vue.register_form.username),
+                                keyword: URLSafeBase64.encode(vue.register_form.keyword),
+                                name: URLSafeBase64.encode(vue.register_form.name),
                                 phoneNum: vue.register_form.phoneNum,
                                 province: vue.register_form.province,
                                 city: vue.register_form.city,

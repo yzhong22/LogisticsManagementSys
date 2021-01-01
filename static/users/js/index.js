@@ -304,8 +304,8 @@ function getUrlParam(name) {
 }
 
 function onBegin() {
-    app.login_user.username = Base64.decode(getUrlParam("username"));
-    app.login_user.name = Base64.decode(getUrlParam("name"));
+    app.login_user.username = URLSafeBase64.decode(getUrlParam("username"));
+    app.login_user.name = URLSafeBase64.decode(getUrlParam("name"));
 
     app.handle_select(app.default_active, "");
 }

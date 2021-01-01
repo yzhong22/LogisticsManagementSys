@@ -74,8 +74,8 @@ let app = new Vue({
                     zoom: 15
                 },
             },
-            callback:{
-                all:[{goodDescription: 'nihao',callbackState:1},{goodDescription: 'nihaoa',callbackState:2}],
+            callback: {
+                all: [{goodDescription: 'nihao', callbackState: 1}, {goodDescription: 'nihaoa', callbackState: 2}],
                 search_keyword: '',
             }
         },
@@ -131,6 +131,14 @@ let app = new Vue({
             },
             send_add_overlays() {
                 this.send.map.clearOverlays();
+
+                let myIcon = new BMap.Icon("/jsdemo/img/car.png", new BMap.Size(26, 26));
+                var pt = new BMap.Point(this.login_user.location.lng, this.login_user.location.lat);
+                var marker = new BMap.Marker(pt, {
+                    icon: myIcon
+                });
+                this.send.map.addOverlay(marker);
+
                 let i = 0;
                 this.send.nearest_points.forEach(point => {
                     let myMarker = new BMap.Marker(new BMap.Point(point.position.lng, point.position.lat));
@@ -165,17 +173,17 @@ let app = new Vue({
                 order = {};
                 this.order.routeVisible = true;
             },
-            order_mapHandler({BMap, map}){
+            order_mapHandler({BMap, map}) {
                 this.order.map = map;   //将map变量存储在全局
                 this.order.BMap = BMap;
             },
-            callback_queryAll(){
+            callback_queryAll() {
 
             },
-            callback_agree(order){
+            callback_agree(order) {
 
             },
-            callback_finish(order){
+            callback_finish(order) {
 
             }
         }
@@ -196,10 +204,16 @@ function getUrlParam(name) {
 }
 
 function onBegin() {
-    app.login_user.username = Base64.decode(getUrlParam("username"));
-    app.login_user.name = Base64.decode(getUrlParam("name"));
+    app.login_user.username = URLSafeBase64.decode(getUrlParam("username"));
+    app.login_user.name = URLSafeBase64.decode(getUrlParam("name"));
 
-    app.handle_select(app.default_active, "");
+    axios.get('/api/seller/basicInfo?username=' + getUrlParam("username"))
+        .then(response => {
+            app.login_user.location.lng = response.data.lng;
+            app.login_user.location.lat = response.data.lat;
+
+            app.handle_select(app.default_active, "");
+        });
 }
 
 onBegin();

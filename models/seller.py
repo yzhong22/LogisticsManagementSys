@@ -63,7 +63,8 @@ def login(provide_username, provide_keyword):
         res = cursor.fetchall()
         if (len(res) != 0):
             IfSuccess = True
-            truth_name = res[0][0]
+            truth_name = str(res[0][0])
+
             provide_name = utils.base64encode(truth_name)
     except Exception as e:
         print("异常信息为：", e)
@@ -82,7 +83,28 @@ def check_login(username, name):
     sql = "select * from deliver where \"username\"='{0}' and \"name\"='{1}'".format(username, name)
     cursor.execute(sql)  # 执行SQL
     res = cursor.fetchall()
+    cursor.close()
+    conn.close()
     if (len(res) == 0):
         return False
     else:
         return True
+
+
+def basic_info(username):
+    conn = psycopg2.connect(database=database, user=user, password=password, host=host, port=port)
+    cursor = conn.cursor()
+
+    truth_username = utils.base64decode(username)
+
+    sql = "select \"name\",\"addresslon\",\"addresslat\" from deliver where \"username\"='{0}';" \
+        .format(truth_username)
+
+    cursor.execute(sql)  # 执行SQL
+    res = cursor.fetchall()
+    name = res[0][0]
+    lng = res[0][1]
+    lat = res[0][2]
+
+    text = {"username": username, "name": name, "lng": lng, "lat": lat}
+    return json.dumps(text, ensure_ascii=False, indent=4)

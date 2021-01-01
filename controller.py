@@ -128,3 +128,10 @@ def seller_login_check():
     provide_keyword = j_data['keyword']
     result = seller.login(provide_username, provide_keyword)
     return result
+
+
+@app.route('/api/seller/basicInfo')
+def seller_basic_info():
+    id = request.args.get("username")
+    result = seller.basic_info(id)
+    return result

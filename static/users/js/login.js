@@ -19,8 +19,8 @@ let vue = new Vue({
             this.$refs[form].validate((valid) => {
                 if (valid) {
                     let data = {
-                        username: Base64.encode(this.login_form.username),
-                        keyword: Base64.encode(this.login_form.keyword)
+                        username: URLSafeBase64.encode(this.login_form.username),
+                        keyword: URLSafeBase64.encode(this.login_form.keyword)
                     };
 
                     axios.post('/api/user/login', data)
