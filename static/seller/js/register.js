@@ -8,6 +8,9 @@ const validatePass = (rule, value, callback) => {
     }
 };
 
+// Vue.use(VueBaiduMap.default, {
+//     ak: 'MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd'
+// });
 
 vue = new Vue({
     el: "#register",
@@ -17,8 +20,12 @@ vue = new Vue({
             keyword: "",
             checkpass: "",
             phoneNum: "",
-            name: ""
+            name: "",
+            province: "",
+            city: "",
+            addressDetail: ""
         },
+        loading: false,
         register_rules: {
             username: [
                 {required: true, message: '请输入用户名', trigger: 'change'},
@@ -36,14 +43,62 @@ vue = new Vue({
             ],
             phoneNum: [
                 {required: true, message: '请输入电话号码', trigger: 'change'}
-            ]
+            ],
+            province: [
+                {required: true, message: '请输入所在省', trigger: 'change'}
+            ],
+            city: [
+                {required: true, message: '请输入市', trigger: 'change'}
+            ],
+            addressDetail: [
+                {required: true, message: '请输入详细地址', trigger: 'change'}
+            ],
         }
     },
     methods: {
         onSubmit: function (form) {
             this.$refs[form].validate((valid) => {
                 if (valid) {
-                    alert(this.register_form.username);
+                    this.loading = true;
+                    let myGeo = new BMapGL.Geocoder();
+                    myGeo.getPoint(this.register_form.addressDetail, function (point) {
+                        if (point) {
+                            let data = {
+                                username: Base64.encode(vue.register_form.username),
+                                keyword: Base64.encode(vue.register_form.keyword),
+                                name: Base64.encode(vue.register_form.name),
+                                phoneNum: vue.register_form.phoneNum,
+                                province: vue.register_form.province,
+                                city: vue.register_form.city,
+                                addressDetail: vue.register_form.addressDetail,
+                                addressLon: point.lng,
+                                addressLat: point.lat
+                            };
+
+                            axios.post('/api/seller/register', data)
+                                .then(response => {
+                                    if (response.data.ifExist == false) {
+                                        vue.$message({
+                                            message: '注册成功！即将为您跳转登录界面',
+                                            type: 'success'
+                                        });
+                                        vue.loading = false;
+                                        window.setTimeout("window.location='/seller/login'", 2000);
+                                    } else {
+                                        vue.register_form.username = "";
+                                        vue.$message({
+                                            message: '该用户名已存在！',
+                                            type: 'warning'
+                                        });
+                                    }
+                                })
+                        } else {
+                            vue.$message({
+                                message: '坐标转换失败！',
+                                type: 'warning'
+                            });
+                        }
+                    }, this.register_form.city);
                 } else {
                     return false;
                 }

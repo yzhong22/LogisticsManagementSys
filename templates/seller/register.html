@@ -37,8 +37,17 @@
             <el-form-item prop="phoneNum">
                 <el-input v-model="register_form.phoneNum" placeholder="请输入电话号码"></el-input>
             </el-form-item>
+            <el-form-item prop="province">
+                <el-input v-model="register_form.province" placeholder="请输入所在省"></el-input>
+            </el-form-item>
+            <el-form-item prop="city">
+                <el-input v-model="register_form.city" placeholder="请输入所在市"></el-input>
+            </el-form-item>
+            <el-form-item prop="addressDetail">
+                <el-input v-model="register_form.addressDetail" placeholder="请输入详细地址信息"></el-input>
+            </el-form-item>
             <el-form-item class="btn_line">
-                <el-button type="primary" @click="onSubmit('register_form')" class="register_btn">注册</el-button>
+                <el-button type="primary" @click="onSubmit('register_form')" class="register_btn" :loading="loading">注册</el-button>
             </el-form-item>
             <el-form-item style="margin-bottom: 0">
                 <a href="/seller/login" class="already_have">已有账户？</a>
@@ -52,6 +61,10 @@
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--<script src="https://unpkg.com/vue-baidu-map"></script>-->
+<script src="//api.map.baidu.com/api?type=webgl&v=1.0&ak=MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd"></script>
+
 <script src="{{ url_for('static', filename='seller/js/register.js') }}"></script>
+
 </body>
 </html>

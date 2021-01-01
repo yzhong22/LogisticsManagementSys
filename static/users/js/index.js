@@ -67,10 +67,10 @@ let app = new Vue({
             }
         },
         unfinishedOrder: {
-            all: [{id: "12321", deliverName: "nihao", orderState: 1},
-                {id: "13621", deliverName: "nihaoa", orderState: 4},
-                {id: "13622", deliverName: "自取", orderState: 2, receivingOption: 1},
-                {id: "13623", deliverName: "派送", orderState: 2, receivingOption: 0}],
+            all: [{id: "12321", deliverName: "nihao", orderState: 1, desChangedTimes: 0, receivingOption: 1},
+                {id: "13621", deliverName: "nihaoa", orderState: 4, desChangedTimes: 0, receivingOption: 1},
+                {id: "13622", deliverName: "自取", orderState: 2, receivingOption: 1, desChangedTimes: 0},
+                {id: "13623", deliverName: "派送", orderState: 2, receivingOption: 0, desChangedTimes: 0}],
             map: 0,
             BMap: 0,
             orderNum: 2,
@@ -262,10 +262,17 @@ let app = new Vue({
 
         },
         order_check_if_changeable(order) {
-            if (order.orderState < 2 && order.desChangedTimes == 0) {
+            if (order.orderState < 3 && order.desChangedTimes == 0) {
                 return false;
             } else {
                 return true;
+            }
+        },
+        order_check_if_callbackable(order) {
+            if (order.orderState < 2) {
+                return false
+            } else {
+                return true
             }
         },
 

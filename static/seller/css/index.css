@@ -102,3 +102,18 @@ html, body {
     height: 350px;
     width: 100%;
 }
+
+.route_aside{
+    width: 35%;
+    margin-left: -20px;
+    margin-right: 20px;
+}
+
+.route_map{
+    height: 500px;
+    width: 100%;
+}
+
+.timeline_span{
+    font-size: 13px;
+}

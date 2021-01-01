@@ -43,6 +43,41 @@ let app = new Vue({
                 addVisible: false,
                 loading: true,
             },
+            order: {
+                all: [],
+                current: {
+                    events: [{
+                        content: '支持使用图标',
+                        timestamp: '2018-04-12 20:46',
+                        size: 'large',
+                        type: 'primary',
+                        icon: 'el-icon-more'
+                    }, {
+                        content: '支持自定义颜色',
+                        timestamp: '2018-04-03 20:46',
+                        color: '#0bbd87'
+                    }, {
+                        content: '支持自定义尺寸',
+                        timestamp: '2018-04-03 20:46',
+                        size: 'large'
+                    }, {
+                        content: '哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈',
+                        timestamp: '2018-04-03 20:46'
+                    }]
+                },
+                search_keyword: '',
+                map: 0,
+                BMap: undefined,
+                routeVisible: false,
+                mapInfo: {
+                    center: {},
+                    zoom: 15
+                },
+            },
+            callback:{
+                all:[{goodDescription: 'nihao',callbackState:1},{goodDescription: 'nihaoa',callbackState:2}],
+                search_keyword: '',
+            }
         },
         methods: {
             // 公共部分
@@ -60,6 +95,7 @@ let app = new Vue({
                         break;
                     case("2"):
                         document.getElementById('all_order').style.display = 'block';
+                        this.order.mapInfo.center = Object.assign({}, this.login_user.location);
                         break;
                     case("3"):
                         document.getElementById('callback').style.display = 'block';
@@ -111,14 +147,36 @@ let app = new Vue({
                 this.send.BMap = BMap;
 
                 this.send_add_overlays();
-            }
-            ,
+            },
             send_chosen_address(btn) {
                 let or = btn.currentTarget.id;
                 or = parseInt(or.charAt(or.length - 1));
 
                 this.send.current.sending_nodeId = this.send.nearest_points[or].id;
                 this.send.nearest_points[or].show = false;
+            },
+            order_queryAll() {
+
+            },
+            order_query() {
+                let keyword = this.order.search_keyword;
+            },
+            order_showRoute(order) {
+                order = {};
+                this.order.routeVisible = true;
+            },
+            order_mapHandler({BMap, map}){
+                this.order.map = map;   //将map变量存储在全局
+                this.order.BMap = BMap;
+            },
+            callback_queryAll(){
+
+            },
+            callback_agree(order){
+
+            },
+            callback_finish(order){
+
             }
         }
     })
@@ -138,8 +196,8 @@ function getUrlParam(name) {
 }
 
 function onBegin() {
-    // app.login_user.username = Base64.decode(getUrlParam("username"));
-    // app.login_user.name = Base64.decode(getUrlParam("name"));
+    app.login_user.username = Base64.decode(getUrlParam("username"));
+    app.login_user.name = Base64.decode(getUrlParam("name"));
 
     app.handle_select(app.default_active, "");
 }

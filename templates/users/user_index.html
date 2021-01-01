@@ -247,15 +247,15 @@
                             sortable>
                     </el-table-column>
                     <el-table-column
-                            prop="addressDetail"
-                            label="地址信息"
-                            width="350"
-                            sortable>
-                    </el-table-column>
-                    <el-table-column
                             prop="goodDescription"
                             label="货物"
                             width="250"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="addressDetail"
+                            label="地址信息"
+                            width="350"
                             sortable>
                     </el-table-column>
                     <el-table-column
@@ -263,6 +263,18 @@
                             label="订单状态"
                             width="140"
                             sortable>
+                        <template slot-scope="scope">
+                            <el-tag v-show="scope.row.orderState==5">已完成</el-tag>
+                            <el-tag v-show="scope.row.orderState==3" type="success">派送中</el-tag>
+                            <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==1" type="success">
+                                待取货
+                            </el-tag>
+                            <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==0" type="info">已到达
+                            </el-tag>
+                            <el-tag v-show="scope.row.orderState==1" type="info">已发货</el-tag>
+                            <el-tag v-show="scope.row.orderState==0" type="info">待发货</el-tag>
+                            <el-tag v-show="scope.row.orderState==4" type="warning">退货中</el-tag>
+                        </template>
                     </el-table-column>
                     <el-table-column label="操作" fixed="right" width="200px">
                         <template slot-scope="scope">
@@ -393,21 +405,35 @@
                             sortable>
                     </el-table-column>
                     <el-table-column
-                            prop="addressDetail"
-                            label="地址信息"
-                            width="300"
-                            sortable>
-                    </el-table-column>
-                    <el-table-column
                             prop="goodDescription"
                             label="货物"
                             width="250"
                             sortable>
                     </el-table-column>
                     <el-table-column
+                            prop="addressDetail"
+                            label="地址信息"
+                            width="350"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="receivingOption"
+                            label="取货方式"
+                            width="120"
+                            fixed="right"
+                            sortable>
+                        <template slot-scope="scope">
+                            <el-tag v-show="scope.row.receivingOption==1" type="warning">
+                                自行取货
+                            </el-tag>
+                            <el-tag v-show="scope.row.receivingOption==0" type="success">上门派送
+                            </el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
                             prop="orderState"
                             label="订单状态"
-                            width="140"
+                            width="120"
                             fixed="right"
                             sortable>
                         <template slot-scope="scope">
@@ -433,7 +459,7 @@
                                     <el-dropdown-item command="a" :disabled="order_check_if_changeable(scope.row)">
                                         更改地址
                                     </el-dropdown-item>
-                                    <el-dropdown-item command="b" :disabled="order_check_if_changeable(scope.row)">
+                                    <el-dropdown-item command="b" :disabled="order_check_if_callbackable(scope.row)">
                                         申请退货
                                     </el-dropdown-item>
                                 </el-dropdown-menu>
