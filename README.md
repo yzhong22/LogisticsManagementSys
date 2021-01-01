@@ -267,4 +267,56 @@ url: /api/seller/send
 
 
 
+#### 全部订单
+
+##### 返回特定卖家的全部订单
+
+类型：GET
+
+url: /api/seller/order/queryAll
+
+说明：查询特定卖家的所有订单
+
+参数：username
+
+示例：
+
+- url: /api/seller/order/queryAll?username=Y2hlbmdmZW5nZ3Vp
+- 附带json：无
+- 回送：
+
+```json
+[{
+  "id":112213125,
+  "receiverName":"钟源",
+  "receiverAddress":"湖北省武汉市武汉大学",		// 需包含省市信息
+  "goodDescription":"爱疯12",
+  "orderState":0
+}]
+```
+
+
+
+##### 根据关键词查询
+
+类型：GET
+
+url: /api/seller/order/query
+
+说明：查询 收货人姓名/收货人地址/商品描述 中包含关键词的记录
+
+参数：username，keyword
+
+
+
 ##### 查询某一订单的路由信息
+
+类型：GET
+
+url: /api/seller/order/route
+
+说明：与用户部分的查询路由相似，只是将username改为卖家的用户名，在deliver表中进行查询，不再赘述
+
+
+
+#### 退货审批
