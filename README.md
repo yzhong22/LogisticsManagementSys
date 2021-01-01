@@ -55,6 +55,17 @@ url: /api/user/order/showCertainOrder
       "nodeNumNow":0,
       "nodeState":0
     },
+    // 这部分是 卖家地址、买家地址、所有路由节点 计算的bounding box
+    "box":{
+      "minLon":100,
+      "minLat":30,
+      "maxLon":110,
+      "maxLat":32
+    },
+    
+    // 上述为新增内容
+    // 上述为新增内容
+    // 上述为新增内容
     "node":[
       // 此部分为路由信息，需根据派送路径进行排序，方便地图可视化显示
       {
