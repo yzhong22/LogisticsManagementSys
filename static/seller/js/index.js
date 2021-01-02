@@ -91,18 +91,15 @@ let app = new Vue({
                 switch (key) {
                     case("1"):
                         document.getElementById('sending_manage').style.display = 'block';
-                        this.send.mapInfo.center = Object.assign({}, this.login_user.location);
                         break;
                     case("2"):
                         document.getElementById('all_order').style.display = 'block';
-                        this.order.mapInfo.center = Object.assign({}, this.login_user.location);
                         break;
                     case("3"):
                         document.getElementById('callback').style.display = 'block';
                         break;
                     default:
                         document.getElementById('sending_manage').style.display = 'block';
-                        this.send.mapInfo.center = Object.assign({}, this.login_user.location);
                         break;
                 }
             },
@@ -125,6 +122,7 @@ let app = new Vue({
                     sending_nodeId: this.send.sending_options[0].id
                 }, order);
                 this.send.addVisible = true;
+
                 if (this.send.map !== 0) {
                     this.send_add_overlays();
                 }
@@ -132,12 +130,16 @@ let app = new Vue({
             send_add_overlays() {
                 this.send.map.clearOverlays();
 
-                let myIcon = new BMap.Icon("/jsdemo/img/car.png", new BMap.Size(26, 26));
+                let w = 30;
+                let h = 30;
+                let img_url = "/api/img?file=seller_position&&type=png&&width=" + w + "&&height=" + h;
+                let myIcon = new BMap.Icon(img_url, new BMap.Size(w, h));
                 var pt = new BMap.Point(this.login_user.location.lng, this.login_user.location.lat);
                 var marker = new BMap.Marker(pt, {
                     icon: myIcon
                 });
                 this.send.map.addOverlay(marker);
+                // this.send.map.centerAndZoom(pt,15);
 
                 let i = 0;
                 this.send.nearest_points.forEach(point => {
@@ -154,6 +156,7 @@ let app = new Vue({
                 this.send.map = map;   //将map变量存储在全局
                 this.send.BMap = BMap;
 
+                this.send.mapInfo.center = Object.assign({}, this.login_user.location);
                 this.send_add_overlays();
             },
             send_chosen_address(btn) {
@@ -176,6 +179,8 @@ let app = new Vue({
             order_mapHandler({BMap, map}) {
                 this.order.map = map;   //将map变量存储在全局
                 this.order.BMap = BMap;
+
+                this.order.mapInfo.center = Object.assign({}, this.login_user.location);
             },
             callback_queryAll() {
 

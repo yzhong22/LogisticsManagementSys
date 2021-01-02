@@ -1,12 +1,33 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, make_response
 import utils
-import models.user as user
-import models.seller as seller
+from models import user, seller, node
 import json
 import os
+from PIL import Image
 
 os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
 app = Flask('user_controller')
+
+
+# 获取本地图片
+@app.route('/api/img')
+def get_imgs():
+    file_name = request.args.get("file")
+    file_type = request.args.get("type")
+    w = int(request.args.get("width"))
+    h = int(request.args.get("height"))
+    basepath = os.path.dirname(__file__)  # 当前文件所在路径
+    upload_path = os.path.join(basepath, 'static/img', file_name + '.' + file_type)
+    temporal_path = os.path.join(basepath, 'static/img', 'temporal.png')
+
+    img = Image.open(upload_path).resize((w, h), Image.ANTIALIAS)
+    img.save(temporal_path)
+
+    image_data = open(temporal_path, "rb").read()
+    os.remove(temporal_path)  # 删除文件
+    response = make_response(image_data)
+    response.headers['Content-Type'] = 'image/png'
+    return response
 
 
 ###############
@@ -72,12 +93,13 @@ def user_login_check():
 ### 卖家部分 ###
 ###############
 
-# 返回卖家注册
+# 返回卖家注册页面
 @app.route('/seller/register')
 def seller_register_page():
     return render_template('seller/register.html')
 
 
+# 返回卖家登录页面
 @app.route('/seller/login')
 def seller_login_page():
     return render_template('seller/login.html')
@@ -102,6 +124,7 @@ def seller_index_page():
         return redirect(url_for('seller_login_page'))
 
 
+# 卖家注册
 @app.route('/api/seller/register', methods=['POST'])
 def seller_register():
     data = request.get_data()
@@ -120,6 +143,7 @@ def seller_register():
     return result
 
 
+# 卖家登录检验（防止违法URL访问）
 @app.route('/api/seller/login', methods=['POST'])
 def seller_login_check():
     data = request.get_data()
@@ -130,8 +154,25 @@ def seller_login_check():
     return result
 
 
+# 获取卖家基本信息
 @app.route('/api/seller/basicInfo')
 def seller_basic_info():
     id = request.args.get("username")
     result = seller.basic_info(id)
+    return result
+
+
+###############
+### 中间节点 ###
+###############
+
+@app.route('/node')
+def node_index():
+    return render_template('node/index.html')
+
+
+@app.route('/api/node/options/query')
+def node_search():
+    keyword = request.args.get("search_keyword")
+    result = node.search_node_options(keyword)
     return result
