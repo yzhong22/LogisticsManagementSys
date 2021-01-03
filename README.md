@@ -498,3 +498,79 @@ url: /api/node/fetch/query
 说明：查询订单中  收货人/收货人电话/物品信息/骑手名称/骑手号码  中包含关键词的订单，回送结构与上相同
 
 参数：nodeId，search_keyword
+
+
+
+### 第三方骑手部分
+
+##### 根据骑手的位置获取附近节点订单
+
+类型：GET
+
+url :/api/dispatcher/queryNear
+
+说明：根据骑手的位置，获取附近（3km以内）节点的位置和这些节点待派送（orderState为2，receivingOption为0）的订单
+
+参数：lng，lat（骑手的经纬度）
+
+示例：
+
+- url: /api/dispatcher/queryNear?lng=120&&lat=30
+- 附带json：无
+- 返回：
+
+```json
+{
+  // 第一部分为附近节点信息
+  "nearby_nodes":[{
+    "lng":120,
+    "lat":30,
+    "orderNums":3
+  },{
+    // ...
+  }],
+  // 第二部分为附近节点的订单
+  // 这部分要根据距离远近排序，最近的在最前面
+  "orders":[{
+    "id":"21321312312312", 	// 订单id
+    "receiverName":"钟源",
+    "receiverPhoneNum":"18186113076",
+    "goodDescription":"爱疯12",
+    "receiverAddress":"武汉市武汉大学",	// 带上市区信息
+    "nodeAddress":"xxxx韵达快递",
+    "distance":"100米",
+    "receiverLng":120.3,
+    "receiverLat":30.2,
+    "nodeLng":119.4,
+    "nodeLat":30.1
+  },{
+    // ...
+  }]
+}
+```
+
+
+
+##### 骑手接单
+
+类型：POST
+
+url: /api/dispatcher/grab
+
+说明：骑手选择接单，将指定订单的orderState改为3，并将订单的dispatcherUsername改为自己的username
+
+参数：无
+
+示例：
+
+- url: /api/dispatcher/grab
+- 附带json：
+
+```json
+{
+  "username":"chengfenggui",
+  "id":"123124123123"	// 订单id
+}
+```
+
+- 回送：无
