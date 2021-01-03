@@ -1,0 +1,82 @@
+body {
+    background-color: #B0E0E6;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-attachment: fixed;
+}
+
+.container {
+    display: inline-block;
+    position: relative;
+    margin-top: 10%;
+    width: 100%;
+}
+
+.title {
+    float: left;
+    color: #ffffff;
+    position: relative;
+    margin-top: 55px;
+    left: 15%;
+}
+
+.login_card {
+    float: right;
+    position: relative;
+    width: 26%;
+    right: 10%;
+}
+
+.line_1 {
+    font-weight: bolder;
+    font-family: "Heiti SC";
+    font-size: 69px;
+    line-height: 0.2;
+    letter-spacing: 3px;
+}
+
+.line_2 {
+    font-weight: lighter;
+    font-family: "Heiti SC";
+    font-size: 35px;
+    line-height: 0.3;
+    letter-spacing: 8px;
+    margin-left: 7px;
+}
+
+.login_form {
+    padding: 0 10px 0 10px;
+}
+
+.login_btn {
+    width: 100%;
+    font-size: 15px;
+}
+
+.a_forget_keyword {
+    font-size: 6px;
+    margin-right: 15px;
+}
+
+.icon {
+    width: 50px;
+    height: 50px
+}
+
+.header {
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.btn_line {
+    margin-top: 33px;
+    margin-bottom: 3px;
+}
+
+h2 {
+    margin: 0 0 0 25px;
+    position: absolute;
+    top: 10%;
+    display: inline-block;
+}
+

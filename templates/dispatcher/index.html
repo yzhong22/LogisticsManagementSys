@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>放心递·最后一公里派送</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/theme.png') }}">
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dispatcher/css/index.css') }}">
+</head>
+<body>
+<el-container id="app" class="container">
+    <el-header class="header">
+        <div class="title">
+            <svg t="1608088953057" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                 xmlns="http://www.w3.org/2000/svg" p-id="7787" data-spm-anchor-id="a313x.7781069.0.i3" width="200"
+                 height="200">
+                <path d="M512 1024a512 512 0 1 1 512-512 512 512 0 0 1-512 512zM204.8 663.098514s4.388571 32.709486 14.511543 43.008a164.161829 164.161829 0 0 0 28.862171 21.035886l207.316115 57.724343a61.264457 61.264457 0 0 0 23.405714 3.203657 9.172114 9.172114 0 0 0 3.437714-9.537829V439.793371L204.8 362.554514v300.544z m0-331.8784l298.1888 82.183315 117.3504-32.329143-299.549257-82.563657z m314.719086-79.520914a119.442286 119.442286 0 0 0-16.384-2.925714 121.490286 121.490286 0 0 0-16.822857 3.189028l-86.952229 24.429715 300.500114 82.812342 101.566172-27.984457z m282.9312 379.845486V362.554514h-0.087772l-88.020114 24.4736v130.530743l-58.031543 16.003657v-130.369828l-132.534857 36.893257v310.842514a131.101257 131.101257 0 0 0 3.072 36.673829c3.8912 5.646629 23.186286-2.282057 23.186286-2.282057l186.294857-51.843658a155.384686 155.384686 0 0 0 53.774628-25.234285c14.467657-14.716343 12.346514-76.6976 12.346515-76.6976z"
+                      fill="#1A8EFF" p-id="7788"></path>
+            </svg>
+            <p class="header_title">放心递·最后一公里派送</p>
+        </div>
+        <div class="user_info">
+            <el-dropdown @command="handle_command">
+                <i class="el-icon-setting"></i>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="1">修改密码</el-dropdown-item>
+                    <el-dropdown-item command="2">注销登录</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+            <span class='welcome_txt' v-text="'欢迎您，'+login_user.name"></span>
+            <el-avatar :size="40"
+                       src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
+                       class="evatar"></el-avatar>
+        </div>
+    </el-header>
+    <div class="divider"></div>
+    <el-container>
+        <el-aside class="side" style="width:40%">
+            <div class="aside_content">
+                <el-form label-width="13%" class="location_form">
+                    <el-form-item label="骑手定位">
+                        <el-input placeholder="请输入位置" v-model="login_user.location.address">
+                            <span slot="prepend" v-text="login_user.location.city"></span>
+                            <el-button slot="append" icon="el-icon-location-outline" @click="locate()"></el-button>
+                        </el-input>
+                    </el-form-item>
+                    <baidu-map class="location_map" :center="location_mapInfo.center" :zoom="location_mapInfo.zoom"
+                               @ready="locationMap_handler" @click="location_pick">
+                    </baidu-map>
+                </el-form>
+            </div>
+        </el-aside>
+        <el-main class="main">
+            <p class="main_header">派送接单</p>
+            <el-table
+                    :data="order.all"
+                    class="content-table"
+                    :fit="true"
+                    :show-header="true"
+                    height="520">
+                <el-table-column
+                        fixed="left"
+                        prop="id"
+                        label="订单编号"
+                        width="150"
+                        sortable>
+                </el-table-column>
+                <el-table-column
+                        prop="receiverName"
+                        label="收货人"
+                        width="150"
+                        sortable>
+                </el-table-column>
+                <el-table-column
+                        prop="receiverPhoneNum"
+                        label="收货人电话"
+                        width="150">
+                </el-table-column>
+                <el-table-column
+                        prop="goodDescription"
+                        label="货物"
+                        width="250">
+                </el-table-column>
+                <el-table-column
+                        prop="receiverAddress"
+                        label="买家地址"
+                        width="350"
+                        sortable>
+                </el-table-column>
+                <el-table-column
+                        prop="nodeAddress"
+                        label="节点地址"
+                        width="350"
+                        sortable>
+                </el-table-column>
+                <el-table-column
+                        fixed="right"
+                        prop="distance"
+                        label="接单距离"
+                        width="100"
+                        sortable>
+                </el-table-column>
+                <el-table-column label="操作" fixed="right" width="200px">
+                    <template slot-scope="scope">
+                        <el-button mc-type="column-el-button" size="mini"
+                                   @click="show_route(scope.row)" :disabled="order.route_disabled">路线预览
+                        </el-button>
+                        <el-button mc-type="column-el-button" size="mini" type="primary"
+                                   @click="grab(scope.row)">接单
+                        </el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <el-dialog title="派送预览" :visible.async="order.route_visible" width="60%"
+                       @close="order.route_visible=false" style="margin-top: -5%">
+                <el-form label-width="10%" :model="order.current" ref="order.current" class="demo-ruleForm"
+                         style="margin-bottom: -30px">
+                    <el-form-item label="派送路径">
+                        <span class="detail_span" v-text="order.current.planInfo"></span>
+                    </el-form-item>
+                    <baidu-map class="dispatch_map" :center="order.mapInfo.center"
+                               zoom="14" @ready="dispatch_mapHandler"
+                               ak="MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd"></baidu-map>
+                    <el-form-item style="text-align: right;margin-top: 20px">
+                            <el-button @click="order.route_visible=false" size="small">取消</el-button>
+                            <el-button @click="grab_dialog()" type="primary" size="small">接单</el-button>
+                        </el-form-item>
+                </el-form>
+            </el-dialog>
+        </el-main>
+    </el-container>
+</el-container>
+<!--外部引入-->
+<script src="https://cdn.jsdelivr.net/npm/js-base64@3.6.0/base64.min.js"></script>
+<script src="{{ url_for('static', filename='share/js/urlsafe-base64.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/vue-baidu-map"></script>
+<!--<script src="https://api.map.baidu.com/api?v=1.0&ak=MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd"></script>-->
+
+<!--本地文件-->
+<script src="{{ url_for('static', filename='dispatcher/js/index.js') }}"></script>
+</body>
+</html>

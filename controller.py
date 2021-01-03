@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, make_response
 import utils
-from models import user, seller, node
+from models import user, seller, node, dispatcher
 import json
 import os
 from PIL import Image
@@ -18,7 +18,7 @@ def get_imgs():
     h = int(request.args.get("height"))
     basepath = os.path.dirname(__file__)  # 当前文件所在路径
     upload_path = os.path.join(basepath, 'static/img', file_name + '.' + file_type)
-    temporal_path = os.path.join(basepath, 'static/img', 'temporal.png')
+    temporal_path = os.path.join(basepath, 'static/img', file_name + '_temporal.png')
 
     img = Image.open(upload_path).resize((w, h), Image.ANTIALIAS)
     img.save(temporal_path)
@@ -182,4 +182,61 @@ def node_search():
 def node_info():
     id = request.args.get("id")
     result = node.query_node_detail(id)
+    return result
+
+
+###############
+### 派送骑手 ###
+###############
+
+# 返回用户登录界面
+@app.route('/dispatcher/login')
+def dispatcher_login():
+    return render_template('dispatcher/login.html')
+
+
+# 返回用户注册界面
+@app.route('/dispatcher/register')
+def dispatcher_register():
+    return render_template('dispatcher/register.html')
+
+
+# 返回用户主页
+@app.route('/dispatcher')
+def dispatcher_welcome():
+    id = request.args.get("username")
+    name = request.args.get("name")
+
+    try:
+        tru_id = utils.base64decode(id)
+        tru_name = utils.base64decode(name)
+        res = dispatcher.check_login(tru_id, tru_name)
+
+        if (res == True):
+            return render_template('dispatcher/index.html')
+        else:
+            return redirect(url_for('dispatcher_login'))  # url重定向
+    except:
+        return redirect(url_for('dispatcher_login'))
+
+
+@app.route('/api/dispatcher/register', methods=['POST'])
+def dispatcher_register_upload():
+    data = request.get_data()
+    j_data = json.loads(data)
+    provide_username = j_data['username']
+    provide_keyword = j_data['keyword']
+    provide_name = j_data['name']
+    phone_num = j_data['phoneNum']
+    result = dispatcher.register(provide_username, provide_keyword, provide_name, phone_num)
+    return result
+
+
+@app.route('/api/dispatcher/login', methods=['POST'])
+def dispatcher_login_check():
+    data = request.get_data()
+    j_data = json.loads(data)
+    provide_username = j_data['username']
+    provide_keyword = j_data['keyword']
+    result = dispatcher.login(provide_username, provide_keyword)
     return result

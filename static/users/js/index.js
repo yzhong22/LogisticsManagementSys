@@ -310,5 +310,5 @@ function onBegin() {
     app.handle_select(app.default_active, "");
 }
 
-onBegin()
+onBegin();
 
