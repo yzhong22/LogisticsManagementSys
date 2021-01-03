@@ -118,3 +118,14 @@ html, body {
     margin-left: -20px;
     margin-right: 20px;
 }
+
+.dispatch_detail_span{
+    margin-left: 15px;
+    font-size: 8pt;
+}
+
+.dispatch_map{
+    height: 400px;
+    width: 100%;
+    margin-bottom: 20px;
+}

@@ -52,10 +52,16 @@
                     <i class="el-icon-s-promotion"></i>
                     <span slot="title">发货管理</span>
                 </el-menu-item>
-                <el-menu-item index="3">
-                    <i class="el-icon-truck"></i>
-                    <span slot="title">派送管理</span>
-                </el-menu-item>
+                <el-submenu index="3">
+                    <template slot="title">
+                        <i class="el-icon-truck"></i>
+                        <span>派送管理</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item index="3-1">上门取货</el-menu-item>
+                        <el-menu-item index="3-2">第三方骑手派送</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
             </el-menu>
         </el-aside>
         <el-main class="main">
@@ -101,7 +107,7 @@
                     </el-table-column>
                     <el-table-column
                             prop="goodDescription"
-                            label="货物"
+                            label="货物信息"
                             width="250">
                     </el-table-column>
                     <el-table-column
@@ -130,7 +136,7 @@
                 <p class="main_header">发货管理</p>
                 <el-row class="search_row">
                     <el-col :xs="24" :md="12">
-                        <el-input placeholder="请输入条件" v-model="send.search_keyword" class="input-with-select">
+                        <el-input placeholder="请输入关键字进行搜索" v-model="send.search_keyword" class="input-with-select">
                             <el-button slot="append" icon="el-icon-search" @click="send_query()"></el-button>
                         </el-input>
                     </el-col>
@@ -173,7 +179,7 @@
                     </el-table-column>
                     <el-table-column
                             prop="goodDescription"
-                            label="货物"
+                            label="货物信息"
                             width="250">
                     </el-table-column>
                     <el-table-column
@@ -225,8 +231,158 @@
                     </el-form>
                 </el-dialog>
             </div>
+            <div id="fetching">
+                <p class="main_header">上门取货</p>
+                <el-row class="search_row">
+                    <el-col :xs="24" :md="12">
+                        <el-input placeholder="请输入关键字进行搜索" v-model="dispatch.search_keyword" class="input-with-select">
+                            <el-button slot="append" icon="el-icon-search" @click="fetch_query()"></el-button>
+                        </el-input>
+                    </el-col>
+                    <el-col :xs="24" :md="6" style="margin-left: 40px">
+                        <el-button-group>
+                            <el-button @click="fetch_queryAll()" icon="el-icon-refresh-left"></el-button>
+                        </el-button-group>
+                    </el-col>
+                </el-row>
+                <el-table
+                        :data="fetch.all"
+                        class="content-table"
+                        :fit="true"
+                        :show-header="true"
+                        height="470">
+                    <el-table-column
+                            fixed="left"
+                            prop="id"
+                            label="订单编号"
+                            width="150"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="receiverName"
+                            label="收货人"
+                            width="200"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="receiverPhoneNum"
+                            label="收货人联系方式"
+                            width="150"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="goodDescription"
+                            label="货物信息"
+                            width="250">
+                    </el-table-column>
+                    <el-table-column
+                            prop="receiverAddress"
+                            label="收货地址"
+                            width="350"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="detainedTime"
+                            label="滞留时间"
+                            width="150"
+                            sortable
+                            fixed="right">
+                    </el-table-column>
+                    <el-table-column label="操作" fixed="right" width="150px">
+                        <template slot-scope="scope">
+                            <el-button mc-type="column-el-button" size="mini" type="primary">短信提醒
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
             <div id="dispatching">
+                <p class="main_header">第三方骑手派送管理</p>
+                <el-row class="search_row">
+                    <el-col :xs="24" :md="12">
+                        <el-input placeholder="请输入关键字进行搜索" v-model="dispatch.search_keyword" class="input-with-select">
+                            <el-button slot="append" icon="el-icon-search" @click="dispatch_query()"></el-button>
+                        </el-input>
+                    </el-col>
+                    <el-col :xs="24" :md="6" style="margin-left: 40px">
+                        <el-button-group>
+                            <el-button @click="dispatch_queryAll()" icon="el-icon-refresh-left"></el-button>
+                        </el-button-group>
+                    </el-col>
+                </el-row>
+                <el-table
+                        :data="dispatch.all"
+                        class="content-table"
+                        :fit="true"
+                        :show-header="true"
+                        height="470">
+                    <el-table-column
+                            fixed="left"
+                            prop="id"
+                            label="订单编号"
+                            width="150"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="receiverName"
+                            label="收货人"
+                            width="200"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="receiverPhoneNum"
+                            label="收货人联系方式"
+                            width="150"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="goodDescription"
+                            label="货物信息"
+                            width="250">
+                    </el-table-column>
+                    <el-table-column
+                            prop="receiverAddress"
+                            label="收货地址"
+                            width="350"
+                            sortable>
+                    </el-table-column>
+                    <el-table-column
+                            prop="orderState"
+                            label="派送状态"
+                            width="120"
+                            fixed="right"
+                            sortable>
+                        <template slot-scope="scope">
+                            <el-tag v-show="scope.row.orderState==2" type="warning">未接单</el-tag>
+                            <el-tag v-show="scope.row.orderState==3" type="success">派送中</el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作" fixed="right" width="150px">
+                        <template slot-scope="scope">
+                            <el-button mc-type="column-el-button" size="mini" type="primary"
+                                       @click="dispatch_show_detail(scope.row)">查看详情
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
 
+                <el-dialog title="派送详情" :visible.async="dispatch.detail_visible" width="60%"
+                           @close="dispatch.detail_visible=false" style="margin-top: -5%">
+                    <el-form label-width="10%" :model="dispatch.current" ref="dispatch.current" class="demo-ruleForm"
+                             style="margin-bottom: -30px">
+                        <el-form-item label="骑手信息">
+                            <span class="dispatch_detail_span" v-text="dispatch.current.dispatcherInfo"></span>
+                        </el-form-item>
+                        <el-form-item label="派送路径">
+                            <span class="dispatch_detail_span" v-text="dispatch.current.planInfo"></span>
+                        </el-form-item>
+                        <baidu-map class="dispatch_map" :center="dispatch.mapInfo.center"
+                                   :zoom="dispatch.mapInfo.zoom" :scroll-wheel-zoom="true" @ready="dispatch_mapHandler"
+                                   ak="MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd"></baidu-map>
+                    </el-form>
+
+
+                </el-dialog>
             </div>
         </el-main>
     </el-container>

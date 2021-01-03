@@ -176,3 +176,10 @@ def node_search():
     keyword = request.args.get("search_keyword")
     result = node.search_node_options(keyword)
     return result
+
+
+@app.route('/api/node/info')
+def node_info():
+    id = request.args.get("id")
+    result = node.query_node_detail(id)
+    return result
