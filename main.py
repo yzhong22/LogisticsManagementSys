@@ -1,6 +1,5 @@
 from controller import app
 
-
 def main():
     app.run()
 

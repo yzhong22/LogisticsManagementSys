@@ -129,10 +129,10 @@
                     <el-table-column label="操作" fixed="right" width="200px">
                         <template slot-scope="scope">
                             <el-button mc-type="column-el-button" size="mini" type="primary"
-                                       @click="showEdit(scope.row)">编辑
+                                       @click="address_showEdit(scope.row)">编辑
                             </el-button>
                             <el-button mc-type="column-el-button" size="mini" type="danger"
-                                       @click="deleteTodo(scope.row)">删除
+                                       @click="address_delete(scope.row)">删除
                             </el-button>
                         </template>
                     </el-table-column>
@@ -171,7 +171,7 @@
                         <el-form-item style="text-align: right;">
                             <el-button @click="address.addVisible=false" type="danger" icon="el-icon-close"
                                        circle></el-button>
-                            <el-button @click="submitAddress('current')" type="success" icon="el-icon-check"
+                            <el-button @click="address_submit('address.current')" type="success" icon="el-icon-check"
                                        circle></el-button>
                         </el-form-item>
                     </el-form>
@@ -243,7 +243,7 @@
                     <el-table-column
                             prop="deliverName"
                             label="发货人"
-                            width="150"
+                            width="200"
                             sortable>
                     </el-table-column>
                     <el-table-column
@@ -262,18 +262,21 @@
                             prop="orderState"
                             label="订单状态"
                             width="140"
-                            sortable>
+                            sortable
+                            fixed="right">
                         <template slot-scope="scope">
-                            <el-tag v-show="scope.row.orderState==5">已完成</el-tag>
-                            <el-tag v-show="scope.row.orderState==3" type="success">派送中</el-tag>
-                            <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==1" type="success">
+                            <el-tag v-show="scope.row.orderState==5&&scope.row.callbackState==0" type="success">已完成</el-tag>
+                            <el-tag v-show="scope.row.orderState==5&&scope.row.callbackState==3" type="danger">已退货
+                            </el-tag>
+                            <el-tag v-show="scope.row.orderState==3" type="primary">派送中</el-tag>
+                            <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==1" type="primary">
                                 待取货
                             </el-tag>
                             <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==0" type="info">已到达
                             </el-tag>
                             <el-tag v-show="scope.row.orderState==1" type="info">已发货</el-tag>
-                            <el-tag v-show="scope.row.orderState==0" type="info">待发货</el-tag>
-                            <el-tag v-show="scope.row.orderState==4" type="warning">退货中</el-tag>
+                            <el-tag v-show="scope.row.orderState==0" type="warning">待发货</el-tag>
+                            <el-tag v-show="scope.row.orderState==4" type="danger">退货中</el-tag>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" fixed="right" width="200px">
@@ -281,7 +284,8 @@
                             <el-button mc-type="column-el-button" size="mini"
                                        @click="order_showRoute(scope.row)">查看路由
                             </el-button>
-                            <el-button mc-type="column-el-button" size="mini" type="primary"
+                            <el-button mc-type="column-el-button" size="mini" type="primary" slot="reference"
+                                       :disabled="scope.row.orderState>=4"
                                        @click="order_confirmReceive(scope.row)">确认收货
                             </el-button>
                         </template>
@@ -349,38 +353,33 @@
                     </el-form>
                 </el-dialog>
 
-                <!-- 地图显示时间框-->
-                <el-dialog style="margin-top: -30px" title="地址选择" :visible.async="order.routeMapVisible" width="80%"
-                           @close="order.routeMapVisible=false">
-                    <templete style="margin-top:-30px">
-                        <baidu-map class="form_map" :center="address.mapInfo.center"
-                                   :zoom="address.mapInfo.zoom" @click="address_pointPick"
-                                   :scroll-wheel-zoom="true" @ready="address_mapHandler"
-                                   ak="MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd"></baidu-map>
-                    </templete>
-                    <el-row style="padding-top: 20px">
-                        <el-col :span="8">
-                            <el-input type="number" v-model.number="address.temporal_coor.addressLon"
-                                      placeholder="请在地图上点击以选择经度"
-                                      style="width: 100%;" disabled>
-                                <template slot="prepend">经度</template>
-                            </el-input>
-                        </el-col>
-                        <el-col :span="8" style="padding-left: 10px">
-                            <el-input type="number" v-model.number="address.temporal_coor.addressLat"
-                                      placeholder="请在地图上点击以选择纬度"
-                                      style="width: 100%;" disabled>
-                                <template slot="prepend">纬度</template>
-                            </el-input>
-                        </el-col>
-                        <el-button style="float: right;margin-left: 10px" type="success"
-                                   icon="el-icon-check"
-                                   circle></el-button>
-                        <el-button style="float:right" @click="address.mapVisible=false" type="danger"
-                                   icon="el-icon-close"
-                                   circle></el-button>
-                    </el-row>
+                <el-dialog title="订单路由" :visible.async="order.routeVisible" width="80%"
+                           @close="order.routeVisible=false" style="margin-top: -4%">
+                    <el-container style="height: 500px">
+                        <el-aside class="route_aside">
+                            <div class="block">
+                                <el-timeline reverse>
+                                    <el-timeline-item
+                                            v-for="(event, index) in order.current.deliveryInfo"
+                                            :key="index"
+                                            :icon="event.icon"
+                                            :type="event.type"
+                                            :color="event.color"
+                                            :timestamp="event.timestamp">
+                                        <span class="timeline_span" v-text="event.content"></span>
+                                    </el-timeline-item>
+                                </el-timeline>
+                            </div>
+                        </el-aside>
+                        <el-main style="padding: 0">
+                            <baidu-map class="route_map" :center="order.routeMapInfo.center"
+                                       :zoom="order.routeMapInfo.zoom" :scroll-wheel-zoom="true"
+                                       @ready="order_mapHandler"
+                                       ak="MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd"></baidu-map>
+                        </el-main>
+                    </el-container>
                 </el-dialog>
+
             </div>
             <!-- 待收货订单模块 -->
             <div id="tobe_received">
@@ -395,13 +394,13 @@
                             fixed="left"
                             prop="id"
                             label="订单ID"
-                            width="100"
+                            width="150"
                             sortable>
                     </el-table-column>
                     <el-table-column
                             prop="deliverName"
                             label="发货人"
-                            width="150"
+                            width="200"
                             sortable>
                     </el-table-column>
                     <el-table-column
@@ -443,93 +442,119 @@
                             fixed="right"
                             sortable>
                         <template slot-scope="scope">
-                            <el-tag v-show="scope.row.orderState==5">已完成</el-tag>
-                            <el-tag v-show="scope.row.orderState==3" type="success">派送中</el-tag>
-                            <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==1" type="success">
+                            <el-tag v-show="scope.row.orderState==5&&scope.row.callbackState==0" type="success">已完成</el-tag>
+                            <el-tag v-show="scope.row.orderState==5&&scope.row.callbackState==3" type="danger">已退货
+                            </el-tag>
+                            <el-tag v-show="scope.row.orderState==3" type="primary">派送中</el-tag>
+                            <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==1" type="primary">
                                 待取货
                             </el-tag>
                             <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==0" type="info">已到达
                             </el-tag>
                             <el-tag v-show="scope.row.orderState==1" type="info">已发货</el-tag>
-                            <el-tag v-show="scope.row.orderState==0" type="info">待发货</el-tag>
-                            <el-tag v-show="scope.row.orderState==4" type="warning">退货中</el-tag>
+                            <el-tag v-show="scope.row.orderState==0" type="warning">待发货</el-tag>
+                            <el-tag v-show="scope.row.orderState==4" type="danger">退货中</el-tag>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" fixed="right" width="300px">
                         <template slot-scope="scope">
-                            <el-dropdown @command="unfinishedOrder_btnCommand" style="margin-right: 8px">
+                            <el-dropdown style="margin-right: 8px">
                                 <el-button size="mini">
                                     更多<i class="el-icon-arrow-down el-icon--right"></i>
                                 </el-button>
                                 <el-dropdown-menu slot="dropdown">
-                                    <el-dropdown-item command="a" :disabled="order_check_if_changeable(scope.row)">
+                                    <el-dropdown-item command="a" :disabled="!order_check_if_changeable(scope.row)">
                                         更改地址
                                     </el-dropdown-item>
-                                    <el-dropdown-item command="b"
-                                                      :disabled="order_check_if_changeable(scope.row)&&scope.row.receivingOption==1">
+                                    <el-dropdown-item command="b" @click.native="order_change_last_node(scope.row)"
+                                                      :disabled="!(scope.row.receivingOption==1&&scope.row.orderState==1)">
                                         更改代收点
                                     </el-dropdown-item>
-                                    <el-dropdown-item command="c" :disabled="order_check_if_callbackable(scope.row)">
+                                    <el-dropdown-item command="c" :disabled="order_check_if_callbackable(scope.row)"
+                                                      @click.native="order_apply_callback(scope.row)">
                                         申请退货
                                     </el-dropdown-item>
                                     <el-dropdown-item command="d"
-                                                      :disabled="(scope.row.receivingOption==1&&scope.row.orderState==2)||scope.row.receivingOption==2">
+                                                      :disabled="!(scope.row.orderState<3)" @click.native="change_receiving_option(scope.row)">
                                         更改收货方式
                                     </el-dropdown-item>
                                 </el-dropdown-menu>
                             </el-dropdown>
                             <el-button mc-type="column-el-button" size="mini"
-                                       @click="order_showRoute(scope.row)">查看路由
+                                       @click="unfinishedOrder_showRoute(scope.row)">查看路由
                             </el-button>
-                            <!--                            <template>-->
-                            <el-popconfirm
-                                    style="margin-left: 8px"
-                                    confirm-button-text='确认'
-                                    cancel-button-text='取消'
-                                    icon="el-icon-info"
-                                    title="确认收货后将无法撤回，确定要完成订单吗？">
-                                <el-button mc-type="column-el-button" size="mini" type="primary" slot="reference"
-                                           @click="order_confirmReceive(scope.row)">确认收货
-                                </el-button>
-                            </el-popconfirm>
-                            <!--                            </template>-->
+
+                            <el-button mc-type="column-el-button" size="mini" type="primary" slot="reference" :disabled="scope.row.orderState>=4"
+                                       @click="order_confirmReceive(scope.row)">确认收货
+                            </el-button>
+
+                            <!--发货对话框-->
                         </template>
                     </el-table-column>
                 </el-table>
 
-                <!-- 地图显示时间框-->
-                <el-dialog style="margin-top: -30px" title="地址选择" :visible.async="unfinishedOrder.routeMapVisible"
-                           width="80%"
-                           @close="unfinishedOrder.routeMapVisible=false">
-                    <templete style="margin-top:-30px">
-                        <baidu-map class="form_map" :center="address.mapInfo.center"
-                                   :zoom="address.mapInfo.zoom" @click="address_pointPick"
-                                   :scroll-wheel-zoom="true" @ready="address_mapHandler"
-                                   ak="MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd"></baidu-map>
-                    </templete>
-                    <el-row style="padding-top: 20px">
-                        <el-col :span="8">
-                            <el-input type="number" v-model.number="address.temporal_coor.addressLon"
-                                      placeholder="请在地图上点击以选择经度"
-                                      style="width: 100%;" disabled>
-                                <template slot="prepend">经度</template>
-                            </el-input>
-                        </el-col>
-                        <el-col :span="8" style="padding-left: 10px">
-                            <el-input type="number" v-model.number="address.temporal_coor.addressLat"
-                                      placeholder="请在地图上点击以选择纬度"
-                                      style="width: 100%;" disabled>
-                                <template slot="prepend">纬度</template>
-                            </el-input>
-                        </el-col>
-                        <el-button style="float: right;margin-left: 10px" type="success"
-                                   icon="el-icon-check"
-                                   circle></el-button>
-                        <el-button style="float:right" @click="address.mapVisible=false" type="danger"
-                                   icon="el-icon-close"
-                                   circle></el-button>
-                    </el-row>
+                <el-dialog title="订单路由" :visible.async="unfinishedOrder.routeVisible" width="80%"
+                           @close="unfinishedOrder.routeVisible=false" style="margin-top: -4%">
+                    <el-container style="height: 500px">
+                        <el-aside class="route_aside">
+                            <div class="block">
+                                <el-timeline reverse>
+                                    <el-timeline-item
+                                            v-for="(event, index) in unfinishedOrder.current.deliveryInfo"
+                                            :key="index"
+                                            :icon="event.icon"
+                                            :type="event.type"
+                                            :color="event.color"
+                                            :timestamp="event.timestamp">
+                                        <span class="timeline_span" v-text="event.content"></span>
+                                    </el-timeline-item>
+                                </el-timeline>
+                            </div>
+                        </el-aside>
+                        <el-main style="padding: 0">
+                            <baidu-map class="route_map" :center="unfinishedOrder.routeMapInfo.center"
+                                       :zoom="unfinishedOrder.routeMapInfo.zoom" :scroll-wheel-zoom="true"
+                                       @ready="unfinishedOrder_mapHandler"
+                                       ak="MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd"></baidu-map>
+                        </el-main>
+                    </el-container>
                 </el-dialog>
+
+                <el-dialog title="选择新的收货节点" :visible.async="unfinishedOrder.changenode_Visible" width="60%"
+                           @close="unfinishedOrder.changenode_Visible=false" style="margin-top: -6%">
+                    <el-form label-width="10%" :model="unfinishedOrder.change_node_current" ref="unfinishedOrder.change_node_current" class="demo-ruleForm"
+                             style="margin-bottom: -30px">
+                        <el-form-item label="新收货节点">
+                            <el-select v-model="unfinishedOrder.change_node_current.changed_nodeId" placeholder="请选择新的收货节点" filterable
+                                       style="width:60%">
+                                <el-option
+                                        v-for="item in unfinishedOrder.receiving_options"
+                                        :key="item.id"
+                                        :label="item.address"
+                                        :value="item.id">
+                                    <span style="float: left" v-text="item.address"></span>
+                                    <span style="float: right; color: #8492a6; font-size: 13px"
+                                          v-text="item.distance"></span>
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <templete style="margin-top:-30px">
+                            <baidu-map id="send_map" :center="unfinishedOrder.change_node_mapInfo.center"
+                                       :zoom="unfinishedOrder.change_node_mapInfo.zoom" :scroll-wheel-zoom="true"
+                                       @ready="unfinishedOrder_changeNode_mapHandler"
+                                       ak="MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd">
+                            </baidu-map>
+                        </templete>
+                        <el-form-item style="text-align: right;margin-top: 20px">
+                            <el-button @click="unfinishedOrder.changenode_Visible=false" type="danger" icon="el-icon-close"
+                                       circle></el-button>
+                            <el-button @click="unfinishedOrder_change_node_submit()" type="success" icon="el-icon-check"
+                                       circle></el-button>
+                        </el-form-item>
+                    </el-form>
+                </el-dialog>
+
+
             </div>
             <div id="map_orders">
                 <el-table
@@ -542,24 +567,24 @@
                             fixed="left"
                             prop="id"
                             label="订单ID"
-                            width="100"
+                            width="200"
                             sortable>
                     </el-table-column>
                     <el-table-column
                             prop="addressDetail"
                             label="快递点"
-                            width="300"
+                            width="400"
                             sortable>
                     </el-table-column>
                     <el-table-column
                             prop="goodDescription"
                             label="货物"
-                            width="250"
+                            width="350"
                             sortable>
                     </el-table-column>
-                    <el-table-column label="操作" fixed="right" width="300px">
+                    <el-table-column label="操作" fixed="right" width="150px">
                         <template slot-scope="scope">
-                            <el-button mc-type="column-el-button" size="mini"
+                            <el-button mc-type="column-el-button" size="mini" type="primary"
                                        @click="orderMap_zoom(scope.row)">定位
                             </el-button>
                         </template>

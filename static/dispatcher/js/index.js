@@ -22,7 +22,7 @@ let app = new Vue({
             BMap: undefined,
         },
         order: {
-            all: [{distance: '100米', receiverLng: 120.2, receiverLat: 30.1, nodeLng: 119.4, nodeLat: 29.5}],
+            all: [],
             current: {},
             map: 0,
             BMap: undefined,
@@ -90,7 +90,39 @@ let app = new Vue({
                 let addComp = rs.addressComponents;
                 self.login_user.location.city = addComp.city;
                 self.login_user.location.address = addComp.district + addComp.street + addComp.streetNumber;
-                self.order.route_disabled = false;
+
+                let url = '/api/dispatcher/queryNear?lng=' + self.login_user.location.lng
+                    + "&&lat=" + self.login_user.location.lat + "&&city=" + addComp.city;
+                axios.get(url)
+                    .then(res => {
+                        self.order.all = res.data.orders;
+                        let nearby_nodes = res.data.nearby_nodes;
+                        nearby_nodes.forEach(node => {
+                            let img_url = "/api/img?file=express&&type=png&&width=" + 20 + "&&height=" + 20;
+                            let myIcon = new BMap.Icon(img_url, new BMap.Size(20, 20));
+                            let pt = new BMap.Point(node.lng, node.lat);
+                            let marker = new BMap.Marker(pt, {
+                                icon: myIcon
+                            });
+                            self.location_mapInfo.map.addOverlay(marker);
+
+                            let info_str = "<br>待接订单数：" + node.orderNums + "<br>距离：" + node.distance + "";
+                            let opts = {
+                                width: 0,
+                                height: 100,
+                                title: node.address,
+                            };
+                            let infoWindow = new BMap.InfoWindow(info_str, opts);
+                            marker.addEventListener('mouseover', function () {
+                                self.location_mapInfo.map.openInfoWindow(infoWindow, pt);
+                            });
+                            marker.addEventListener('mouseout', function () {
+                                self.location_mapInfo.map.closeInfoWindow(infoWindow, pt);
+                            })
+                        });
+
+                        self.order.route_disabled = false;
+                    });
             });
         },
         locationMap_handler({BMap, map}) {
@@ -129,8 +161,32 @@ let app = new Vue({
             let self = this;
             self.position_changed(self, e.point);
         },
+        query_order() {
+            let url = '/api/dispatcher/queryNear?lng=' + this.login_user.location.lng
+                + "&&lat=" + this.login_user.location.lat + "&&city=" + this.login_user.location.city;
+            axios.get(url)
+                .then(res => {
+                    this.order.all = res.data.orders;
+                })
+        }
+        ,
         grab(order) {
-
+            let data = {
+                username: this.login_user.username,
+                id: order.id
+            };
+            axios.post('/api/dispatcher/grab', data)
+                .then(res => {
+                    if (res.data.ifSuccess) {
+                        this.$message({
+                            message: '接单成功！',
+                            type: 'success'
+                        });
+                    } else {
+                        this.$message.error('接单失败！该单已经被抢走了哦～');
+                    }
+                    this.query_order();
+                });
         },
         show_route(order) {
             this.order.route_visible = true;

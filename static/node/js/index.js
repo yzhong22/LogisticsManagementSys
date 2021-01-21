@@ -23,7 +23,7 @@ let app = new Vue({
                 search_keyword: '',
             },
             send: {
-                all: [{id: "123213214"}],
+                all: [],
                 current: {},
                 search_keyword: '',
                 node_change_visible: false,
@@ -34,11 +34,13 @@ let app = new Vue({
                 node_change_process_loading: false
             },
             fetch: {
-                all: []
+                all: [],
+                search_keyword: '',
             },
             dispatch: {
-                all: [{id: 123213, receiverLng: 114.21, receiverLat: 30.23}],
+                all: [],
                 current: {},
+                search_keyword: '',
                 detail_visible: false,
                 mapInfo: {
                     center: {lng: 0, lat: 0},
@@ -64,15 +66,28 @@ let app = new Vue({
                 switch (key) {
                     case("1"):
                         document.getElementById('receiving_manage').style.display = 'block';
+                        if (this.login_user.id !== "") {
+                            this.receive_query();
+                        }
+
                         break;
                     case("2"):
                         document.getElementById('sending_manage').style.display = 'block';
+                        if (this.login_user.id !== "") {
+                            this.send_query();
+                        }
                         break;
                     case("3-1"):
                         document.getElementById('fetching').style.display = 'block';
+                        if (this.login_user.id !== "") {
+                            this.fetch_query();
+                        }
                         break;
                     case("3-2"):
                         document.getElementById('dispatching').style.display = 'block';
+                        if (this.login_user.id !== "") {
+                            this.dispatch_query();
+                        }
                         break;
                     default:
                         document.getElementById('receiving_manage').style.display = 'block';
@@ -89,6 +104,37 @@ let app = new Vue({
                         this.welcome_word = "欢迎您，" + this.login_user.name;
                         this.handle_select(this.active_now);
                     });
+            },
+            receive_query() {
+                let url = '/api/node/receive/';
+                let keyword = this.receive.search_keyword;
+                if (keyword !== "") {
+                    url = url + 'query?search_keyword=' + keyword + '&&nodeId=' + this.login_user.id;
+                } else {
+                    url = url + 'queryAll?nodeId=' + this.login_user.id;
+                }
+                axios.get(url)
+                    .then(res => {
+                        this.receive.all = res.data;
+                    });
+            },
+            receive_refresh() {
+                this.receive.search_keyword = "";
+                this.receive_query();
+            },
+            receive_order(order) {
+                axios.post('/api/node/receive/confirm?id=' + order.id)
+                    .then(res => {
+                        if (res.data.ifSuccess) {
+                            this.$message({
+                                message: '收货成功！',
+                                type: 'success'
+                            });
+                        } else {
+                            this.$message.error('收货失败！');
+                        }
+                        this.receive_query();
+                    })
             },
             node_options_search(query) {
                 if (query !== '') {
@@ -114,12 +160,78 @@ let app = new Vue({
                         )
                 }
             },
+            send_query() {
+                let url = '/api/node/send/';
+                let keyword = this.send.search_keyword;
+                if (keyword !== "") {
+                    url = url + 'query?search_keyword=' + keyword + '&&nodeId=' + this.login_user.id;
+                } else {
+                    url = url + 'queryAll?nodeId=' + this.login_user.id;
+                }
+                axios.get(url)
+                    .then(res => {
+                        this.send.all = res.data;
+                    });
+            },
+            send_refresh() {
+                this.send.search_keyword = "";
+                this.send_query();
+            },
+            send_order(order) {
+                let url = '/api/node/send/confirm?id=' + order.id;
+                axios.post(url)
+                    .then(res => {
+                        if (res.data.ifSuccess) {
+                            this.$message({
+                                message: '发货成功！',
+                                type: 'success'
+                            });
+                        } else {
+                            this.$message.error('发货失败！');
+                        }
+                        this.send_query();
+                    })
+            },
             send_changeNode(order) {
                 this.send.current = Object.assign({}, order)
                 this.send.node_change_visible = true;
             },
             send_node_change() {
                 console.log(this.send.current);
+            },
+            fetch_query() {
+                let url = '/api/node/fetch/';
+                let keyword = this.fetch.search_keyword;
+                if (keyword !== "") {
+                    url = url + 'query?search_keyword=' + keyword + '&&nodeId=' + this.login_user.id;
+                } else {
+                    url = url + 'queryAll?nodeId=' + this.login_user.id;
+                }
+                axios.get(url)
+                    .then(res => {
+                        this.fetch.all = res.data;
+                    });
+            },
+            fetch_refresh() {
+                this.fetch.search_keyword = "";
+                this.fetch_query();
+            },
+            dispatch_query() {
+                let url = '/api/node/dispatch/';
+                let keyword = this.dispatch.search_keyword;
+                if (keyword !== "") {
+                    url = url + 'query?search_keyword=' + keyword + '&&nodeId=' + this.login_user.id;
+                } else {
+                    url = url + 'queryAll?nodeId=' + this.login_user.id;
+                }
+                axios.get(url)
+                    .then(res => {
+                        this.dispatch.all = res.data;
+                    });
+            },
+            dispatch_refresh() {
+                this.dispatch.search_keyword = "";
+                this.dispatch_query();
             },
             dispatch_show_detail(order) {
                 this.dispatch.detail_visible = true;

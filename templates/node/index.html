@@ -76,7 +76,7 @@
                     </el-col>
                     <el-col class="address_search_btn" :xs="24" :md="12" v-if="true">
                         <el-button-group style="margin-left: 40px">
-                            <el-button @click="receive_queryAll()" icon="el-icon-refresh-left"></el-button>
+                            <el-button @click="receive_refresh()" icon="el-icon-refresh-left"></el-button>
                         </el-button-group>
                     </el-col>
                 </el-row>
@@ -125,7 +125,7 @@
                     <el-table-column label="操作" fixed="right" width="140px">
                         <template slot-scope="scope">
                             <el-button mc-type="column-el-button" size="mini" type="primary"
-                                       @click="receive(scope.row)">确认收货
+                                       @click="receive_order(scope.row)">确认收货
                             </el-button>
                         </template>
                     </el-table-column>
@@ -142,7 +142,7 @@
                     </el-col>
                     <el-col :xs="24" :md="6" style="margin-left: 40px">
                         <el-button-group>
-                            <el-button @click="send_queryAll()" icon="el-icon-refresh-left"></el-button>
+                            <el-button @click="send_refresh()" icon="el-icon-refresh-left"></el-button>
                         </el-button-group>
                     </el-col>
                 </el-row>
@@ -200,7 +200,7 @@
                                        @click="send_changeNode(scope.row)">更改节点
                             </el-button>
                             <el-button mc-type="column-el-button" size="mini" type="primary"
-                                       @click="send(scope.row)">商品发货
+                                       @click="send_order(scope.row)">商品发货
                             </el-button>
                         </template>
                     </el-table-column>
@@ -241,7 +241,7 @@
                     </el-col>
                     <el-col :xs="24" :md="6" style="margin-left: 40px">
                         <el-button-group>
-                            <el-button @click="fetch_queryAll()" icon="el-icon-refresh-left"></el-button>
+                            <el-button @click="fetch_refresh()" icon="el-icon-refresh-left"></el-button>
                         </el-button-group>
                     </el-col>
                 </el-row>
@@ -306,7 +306,7 @@
                     </el-col>
                     <el-col :xs="24" :md="6" style="margin-left: 40px">
                         <el-button-group>
-                            <el-button @click="dispatch_queryAll()" icon="el-icon-refresh-left"></el-button>
+                            <el-button @click="dispatch_refresh()" icon="el-icon-refresh-left"></el-button>
                         </el-button-group>
                     </el-col>
                 </el-row>

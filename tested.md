@@ -365,6 +365,47 @@ url：/api/user/order/query
 
 
 
+##### 查询所有未完成的订单
+
+类型：GET
+
+url: /api/user/order/unfinished/queryAll
+
+说明：查询特定用户所有未完成订单（orderState不为5）
+
+参数：username
+
+示例：
+
+- url: /api/user/order/unfinished/queryAll?username=MjAxODMwMDAwMzA4OQ==
+
+- 附带json：无
+- 回送：
+
+```json
+[
+{
+"id": "160974173271246",
+"accountUsername": "MjAxODMwMDAwMzA4OQ==",
+"goodDescription": "火龙果",
+"receiverName": "钟源",
+"deliverName": "上海龙吴进口水果批发市场",
+"addressDetail": "武汉市当代国际花园",
+"entryTime": "1609741740784",
+"callbackState": 1,
+"orderState": 4,
+"desChangedTimes": 0,
+"receivingOption": 1,
+"fetchAddress": "尚未生成路径"
+},
+  {
+    // ...
+  }
+]
+```
+
+
+
 ##### 确认收货
 
 类型：GET
@@ -380,44 +421,6 @@ url: /api/user/order/confirmReceiving
 - url: /api/user/order/confirmReceiving?id=2012392104
 - 附带json：无
 - 回送：无
-
-##### 申请更改地址(*)
-
-类型：POST
-
-url: /api/user/order/changeDes/apply
-
-说明：根据用户指定的新的收货地址，以及当前派送路径情况，生成新的路由信息。例如，当前正处于第3个节点和第4个节点的派送过程中（即NodeNumNow为2，NodeState为1），则保持前4个节点信息不变，以第4个节点为起始节点，使用最短路径算法，改变从第5个节点及以后的所有节点；若当前正处于第3个节点，但尚未从第3个节点发出（即NodeNumNow为2，NodeState为0），则以第3个节点为起始节点，使用最短路径算法，改变从第4个节点及以后的所有节点。（将已有节点从RouteInfo表中删除，并添加新的节点记录。更改时注意NodeId域，这是表征派送顺序的唯一参照，详情请参照“卖家发货“API）
-
-操作：将订单DesChangedTimes加一，将ReceiverAddressId更改为相应ID。
-
-参数：无
-
-示例：
-
-- url: /api/user/order/changeDes/apply
-- 附带json：
-
-```json
-{
-  "id":123213215,		// 订单编号
-  "receiverUsername":"Y2hlbmdmZW5nZ3Vp",
-  "newAddressId":2
-}
-```
-
-- 回送：
-
-```json
-{
-  "ifSuccess":true
-}
-// 或者检验已不能申请退货（orderState>=3）或已经申请过(DesChangedTimes!=0)
-{
-  "ifSuccess":false,
-  "content":"xxx"	// 向用户进行提示
-}
-```
 
 ##### 申请退货
 
@@ -572,41 +575,6 @@ url: /api/seller/send/nearbyNodes
 }
 ```
 
-
-
-##### 卖家发货(*)
-
-类型：POST
-
-url: /api/seller/send
-
-说明：卖家点击发货按钮，后台根据卖家选择的发货节点，使用最短路径算法生成路径信息（即在RouteInfo中添加相应记录），并更新订单OrderState为1。同时，卖家一发货，便到达第一个节点，将路径中第一个节点的RouteInfo的ArrivingTime更新为当前时间戳（13位毫秒级时间戳）。注意，这里根据最短路径添加节点信息在RouteInfo表里存储，应将NodeId字段按照派送顺序从0或1开始进行排序，以表征派送顺序
-
-参数：无
-
-示例：
-
-- url: /api/seller/send
-- 附带json：
-
-```json
-// 这里只附带基本信息，需根据最短路径算法生成路径
-{
-  "id":123123,	// 订单编号
-  "chosenNodeId":123		// 卖家选择的起始节点编号
-}
-```
-
-- 回送：
-
-```json
-{
-  "ifSuccess":true
-}
-```
-
-
-
 #### 全部订单
 
 ##### 返回特定卖家的全部订单
@@ -650,16 +618,6 @@ url: /api/seller/order/query
 
 
 
-##### 查询某一订单的路由信息(*)
-
-类型：GET
-
-url: /api/seller/order/route
-
-说明：与用户部分的查询路由相似，只是将username改为卖家的用户名，在deliver表中进行查询，不再赘述
-
-
-
 #### 退货审批
 
 ##### 查询所有待处理的退货订单
@@ -689,26 +647,6 @@ url: /api/seller/order/callback/queryAll
   // ....
 }]
 ```
-
-
-
-##### 卖家同意退货申请（*）
-
-类型：POST
-
-url: /api/seller/order/callback/agree
-
-参数：id（订单编号）
-
-说明：与申请更改地址类似，根据目前运输情况，对订单后续节点进行更改，使之原路返回（该节点修改方式参照“申请更改地址API”。如已送到第3个节点，则更改后的信息总共有5个节点，起点和终点为同一节点）
-
-操作：将订单callbackState置为2
-
-示例：
-
-- url: /api/seller/order/callback/agree?id=123124
-- 附带json：无
-- 回送：无
 
 
 

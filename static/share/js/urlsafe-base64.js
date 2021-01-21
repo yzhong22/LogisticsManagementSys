@@ -1,4 +1,4 @@
-var URLSafeBase64 = {
+const URLSafeBase64 = {
     encode: function (str) {
         str = Base64.encode(str);
         return str.replace(/\+/g, '-').replace(/\//g, '_');

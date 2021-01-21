@@ -67,7 +67,7 @@
                     </el-col>
                     <el-col :xs="24" :md="6" style="margin-left: 40px">
                         <el-button-group>
-                            <el-button icon="el-icon-refresh-left" @click="send_setRoute(this)"></el-button>
+                            <el-button icon="el-icon-refresh-left" @click="send_refresh()"></el-button>
                         </el-button-group>
                     </el-col>
                 </el-row>
@@ -102,10 +102,10 @@
                             width="350"
                             sortable>
                     </el-table-column>
-                    <el-table-column label="操作" fixed="right" width="200px">
+                    <el-table-column label="操作" fixed="right" width="150px">
                         <template slot-scope="scope">
                             <el-button mc-type="column-el-button" size="mini" type="primary"
-                                       @click="send_setRoute(scope.row)">编辑
+                                       @click="send_setRoute(scope.row)">发货
                             </el-button>
                         </template>
                     </el-table-column>
@@ -140,52 +140,12 @@
                             <baidu-map id="send_map" :center="send.mapInfo.center"
                                        :zoom="send.mapInfo.zoom" :scroll-wheel-zoom="true" @ready="send_mapHandler"
                                        ak="MTMdfHzZv4SVWqauWpmqOwKjUEysvKpd">
-                                <bm-info-window :position="send.nearest_points[0].position"
-                                                :show="send.nearest_points[0].show"
-                                                @close="send.nearest_points[0].show=false">
-                                    <p v-text="send.nearest_points[0].address"></p>
-                                    <el-button id="send_windowBtn_0" @click="send_chosen_address($event)" size="mini">
-                                        确定
-                                    </el-button>
-                                </bm-info-window>
-                                <bm-info-window :position="send.nearest_points[1].position"
-                                                :show="send.nearest_points[1].show"
-                                                @close="send.nearest_points[1].show=false">
-                                    <p v-text="send.nearest_points[1].address"></p>
-                                    <el-button id="send_windowBtn_1" @click="send_chosen_address($event)" size="mini">
-                                        确定
-                                    </el-button>
-                                </bm-info-window>
-                                <!--                                <bm-info-window :position="send.nearest_points[2].position"-->
-                                <!--                                                :show="send.nearest_points[2].show"-->
-                                <!--                                                @close="send.nearest_points[2].show=false">-->
-                                <!--                                    <p v-text="send.nearest_points[2].address"></p>-->
-                                <!--                                    <el-button id="send_windowBtn_2" @click="send_chosen_address($event)" size="mini">-->
-                                <!--                                        确定-->
-                                <!--                                    </el-button>-->
-                                <!--                                </bm-info-window>-->
-                                <!--                                <bm-info-window :position="send.nearest_points[3].position"-->
-                                <!--                                                :show="send.nearest_points[3].show"-->
-                                <!--                                                @close="send.nearest_points[3].show=false">-->
-                                <!--                                    <p v-text="send.nearest_points[3].address"></p>-->
-                                <!--                                    <el-button id="send_windowBtn_3" @click="send_chosen_address($event)" size="mini">-->
-                                <!--                                        确定-->
-                                <!--                                    </el-button>-->
-                                <!--                                </bm-info-window>-->
-                                <!--                                <bm-info-window :position="send.nearest_points[4].position"-->
-                                <!--                                                :show="send.nearest_points[4].show"-->
-                                <!--                                                @close="send.nearest_points[4].show=false">-->
-                                <!--                                    <p v-text="send.nearest_points[4].address"></p>-->
-                                <!--                                    <el-button id="send_windowBtn_4" @click="send_chosen_address($event)" size="mini">-->
-                                <!--                                        确定-->
-                                <!--                                    </el-button>-->
-                                <!--                                </bm-info-window>-->
                             </baidu-map>
                         </templete>
                         <el-form-item style="text-align: right;margin-top: 20px">
                             <el-button @click="send.addVisible=false" type="danger" icon="el-icon-close"
                                        circle></el-button>
-                            <el-button @click="send_submit('send.current')" type="success" icon="el-icon-check"
+                            <el-button @click="send_submit()" type="success" icon="el-icon-check"
                                        circle :loading="send.loading"></el-button>
                         </el-form-item>
                     </el-form>
@@ -202,7 +162,7 @@
                     </el-col>
                     <el-col class="address_search_btn" :xs="24" :md="12" v-if="true">
                         <el-button-group style="margin-left: 40px">
-                            <el-button @click="order_showRoute()" icon="el-icon-refresh-left"></el-button>
+                            <el-button @click="order_refresh()" icon="el-icon-refresh-left"></el-button>
                         </el-button-group>
                     </el-col>
                 </el-row>
@@ -243,16 +203,16 @@
                             fixed="right"
                             sortable>
                         <template slot-scope="scope">
-                            <el-tag v-show="scope.row.orderState==5">已完成</el-tag>
-                            <el-tag v-show="scope.row.orderState==3" type="success">派送中</el-tag>
-                            <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==1" type="success">
+                            <el-tag v-show="scope.row.orderState==5" type="success">已完成</el-tag>
+                            <el-tag v-show="scope.row.orderState==3" type="primary">派送中</el-tag>
+                            <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==1" type="primary">
                                 待取货
                             </el-tag>
                             <el-tag v-show="scope.row.orderState==2&&scope.row.receivingOption==0" type="info">已到达
                             </el-tag>
                             <el-tag v-show="scope.row.orderState==1" type="info">已发货</el-tag>
-                            <el-tag v-show="scope.row.orderState==0" type="info">待发货</el-tag>
-                            <el-tag v-show="scope.row.orderState==4" type="warning">退货中</el-tag>
+                            <el-tag v-show="scope.row.orderState==0" type="warning">待发货</el-tag>
+                            <el-tag v-show="scope.row.orderState==4" type="danger">退货中</el-tag>
                         </template>
                     </el-table-column>
                     <el-table-column label="操作" fixed="right" width="200px">
@@ -267,14 +227,14 @@
                 </el-table>
 
                 <!--                路径显示对话框-->
-                <el-dialog title="订单路由" :visible.async="order.routeVisible" width="60%"
+                <el-dialog title="订单路由" :visible.async="order.routeVisible" width="80%"
                            @close="order.routeVisible=false" style="margin-top: -4%">
                     <el-container style="height: 500px">
                         <el-aside class="route_aside">
                             <div class="block">
-                                <el-timeline>
+                                <el-timeline reverse>
                                     <el-timeline-item
-                                            v-for="(event, index) in order.current.events"
+                                            v-for="(event, index) in order.current.deliveryInfo"
                                             :key="index"
                                             :icon="event.icon"
                                             :type="event.type"
@@ -282,7 +242,6 @@
                                             :timestamp="event.timestamp">
                                         <span class="timeline_span" v-text="event.content"></span>
                                     </el-timeline-item>
-
                                 </el-timeline>
                             </div>
                         </el-aside>
@@ -304,7 +263,7 @@
                     </el-col>
                     <el-col :xs="24" :md="12" v-if="true">
                         <el-button-group style="margin-left: 40px">
-                            <el-button @click="callback_queryAll()" icon="el-icon-refresh-left"></el-button>
+                            <el-button @click="callback_refresh()" icon="el-icon-refresh-left"></el-button>
                         </el-button-group>
                     </el-col>
                 </el-row>

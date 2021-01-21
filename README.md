@@ -44,7 +44,7 @@ url: /api/user/order/showCertainOrder
     "province":"四川省",
     "city":"成都市",
     "addressDetail":"宽窄巷子",
-    "addressLon":113.345331,
+    "i":113.345331,
     "addressLat":30.120412,
   },
   "route":{
@@ -515,7 +515,7 @@ url :/api/dispatcher/queryNear
 
 示例：
 
-- url: /api/dispatcher/queryNear?lng=120&&lat=30
+- url: /api/dispatcher/queryNear?lng=120&&lat=30&&city=武汉市
 - 附带json：无
 - 返回：
 

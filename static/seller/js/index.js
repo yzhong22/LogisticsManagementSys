@@ -21,53 +21,19 @@ let app = new Vue({
                     center: {},
                     zoom: 15
                 },
-                sending_options: [
-                    {
-                        id: 123,	// 快递节点编号
-                        address: "xxxxx韵达快递",
-                        distance: 12		// 与卖家的距离（单位：米）
-                    }
-                ],
-                nearest_points: [{
-                    id: 123,
-                    position: {lng: 114.372042, lat: 30.544861},
-                    address: "nihao",
-                    show: false,
-                },
-                    {
-                        id: 234,
-                        position: {lng: 114.672042, lat: 30.244861},
-                        address: "test",
-                        show: false,
-                    }],
+                sending_options: [],
                 addVisible: false,
-                loading: true,
+                loading: false,
             },
             order: {
                 all: [],
                 current: {
-                    events: [{
-                        content: '支持使用图标',
-                        timestamp: '2018-04-12 20:46',
-                        size: 'large',
-                        type: 'primary',
-                        icon: 'el-icon-more'
-                    }, {
-                        content: '支持自定义颜色',
-                        timestamp: '2018-04-03 20:46',
-                        color: '#0bbd87'
-                    }, {
-                        content: '支持自定义尺寸',
-                        timestamp: '2018-04-03 20:46',
-                        size: 'large'
-                    }, {
-                        content: '哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈',
-                        timestamp: '2018-04-03 20:46'
-                    }]
+                    diliveryInfo: []
                 },
                 search_keyword: '',
                 map: 0,
                 BMap: undefined,
+                DrivingRoute: 0,
                 routeVisible: false,
                 mapInfo: {
                     center: {},
@@ -75,7 +41,7 @@ let app = new Vue({
                 },
             },
             callback: {
-                all: [{goodDescription: 'nihao', callbackState: 1}, {goodDescription: 'nihaoa', callbackState: 2}],
+                all: [],
                 search_keyword: '',
             }
         },
@@ -91,12 +57,15 @@ let app = new Vue({
                 switch (key) {
                     case("1"):
                         document.getElementById('sending_manage').style.display = 'block';
+                        this.send_query();
                         break;
                     case("2"):
                         document.getElementById('all_order').style.display = 'block';
+                        this.order_query();
                         break;
                     case("3"):
                         document.getElementById('callback').style.display = 'block';
+                        this.callback_query();
                         break;
                     default:
                         document.getElementById('sending_manage').style.display = 'block';
@@ -116,23 +85,27 @@ let app = new Vue({
                 }
             },
             send_setRoute(order) {
-                order = {};
-                this.send.current = Object.assign({
-                    sending_way: "1",
-                    sending_nodeId: this.send.sending_options[0].id
-                }, order);
-                this.send.addVisible = true;
+                this.send.loading = false;
+                axios.get('/api/seller/send/nearbyNodes?username=' + URLSafeBase64.encode(this.login_user.username))
+                    .then(res => {
+                        this.send.sending_options = res.data;
+                        this.send.current = Object.assign({
+                            sending_way: "1",
+                            sending_nodeId: this.send.sending_options[0].id
+                        }, order);
+                        this.send.addVisible = true;
 
-                if (this.send.map !== 0) {
-                    this.send_add_overlays();
-                }
+                        if (this.send.map !== 0) {
+                            this.send_add_overlays();
+                        }
+                    });
             },
             send_add_overlays() {
                 this.send.map.clearOverlays();
 
                 let w = 30;
                 let h = 30;
-                let img_url = "/api/img?file=seller_position&&type=png&&width=" + w + "&&height=" + h;
+                let img_url = "/api/img?file=seller&&type=png&&width=" + w + "&&height=" + h;
                 let myIcon = new BMap.Icon(img_url, new BMap.Size(w, h));
                 var pt = new BMap.Point(this.login_user.location.lng, this.login_user.location.lat);
                 var marker = new BMap.Marker(pt, {
@@ -142,12 +115,25 @@ let app = new Vue({
                 // this.send.map.centerAndZoom(pt,15);
 
                 let i = 0;
-                this.send.nearest_points.forEach(point => {
-                    let myMarker = new BMap.Marker(new BMap.Point(point.position.lng, point.position.lat));
-                    myMarker.addEventListener('click', function () {
-                        point.show = true;
+                this.send.sending_options.forEach(point => {
+                    let pt = new BMap.Point(point.lng, point.lat);
+                    let myMarker = new BMap.Marker(pt, {
+                        icon: new BMap.Icon("/api/img?file=express&&type=png&&width=" + 20 + "&&height=" + 20, new BMap.Size(20, 20))
                     });
                     this.send.map.addOverlay(myMarker);
+
+                    let opts = {
+                        width: 200,
+                        height: 100,
+                    };
+                    let id = point.id;
+                    let infoWindow = new BMap.InfoWindow(point.address, opts);
+                    myMarker.addEventListener('click', function () {
+                        app.send.map.openInfoWindow(infoWindow, pt);
+                        app.send.current.sending_nodeId = id;
+                    });
+                    // let lab = new BMap.Label(point.address, {position: pt});
+                    // this.send.map.addOverlay(lab);
                     i += 1;
                 })
             },
@@ -159,33 +145,247 @@ let app = new Vue({
                 this.send.mapInfo.center = Object.assign({}, this.login_user.location);
                 this.send_add_overlays();
             },
-            send_chosen_address(btn) {
-                let or = btn.currentTarget.id;
-                or = parseInt(or.charAt(or.length - 1));
-
-                this.send.current.sending_nodeId = this.send.nearest_points[or].id;
-                this.send.nearest_points[or].show = false;
+            send_query() {
+                let url = '/api/seller/send/';
+                let keyword = this.send.search_keyword;
+                if (keyword !== "") {
+                    url = url + 'query?search_keyword=' + keyword + '&&username=' + URLSafeBase64.encode(this.login_user.username);
+                } else {
+                    url = url + 'queryAll?username=' + URLSafeBase64.encode(this.login_user.username);
+                }
+                axios.get(url)
+                    .then(res => {
+                        this.send.all = res.data;
+                    });
             },
-            order_queryAll() {
-
+            send_refresh() {
+                this.send.search_keyword = "";
+                this.send_query();
+            },
+            send_submit() {
+                let url = '/api/seller/send';
+                let data = {
+                    id: this.send.current.id,
+                    chosenNodeId: this.send.current.sending_nodeId
+                };
+                console.log(data);
+                this.send.loading = true;
+                axios.post(url, data)
+                    .then(res => {
+                        this.send.loading = false;
+                        this.send.addVisible = false;
+                        if (res.data.ifSuccess) {
+                            this.$message({
+                                message: '发货成功！',
+                                type: 'success'
+                            });
+                        } else {
+                            this.$message.error('发货失败！');
+                        }
+                        this.send_query();
+                    });
             },
             order_query() {
+                let url = '/api/seller/order/';
                 let keyword = this.order.search_keyword;
+                if (keyword !== "") {
+                    url = url + 'query?search_keyword=' + keyword + '&&username=' + URLSafeBase64.encode(this.login_user.username);
+                } else {
+                    url = url + 'queryAll?username=' + URLSafeBase64.encode(this.login_user.username);
+                }
+                axios.get(url)
+                    .then(res => {
+                        this.order.all = res.data;
+                    });
+            },
+            order_refresh() {
+                this.order.search_keyword = "";
+                this.order_query();
             },
             order_showRoute(order) {
-                order = {};
-                this.order.routeVisible = true;
+                let self = this;
+                let url = '/api/user/order/showCertainOrder?id=' + order.id;
+                axios.get(url)
+                    .then(res => {
+                        let deliveryInfo = res.data.route.deliveryInfo;
+
+                        // 添加timeline样式
+                        deliveryInfo.forEach(r => {
+                            if (r.event == "create") {
+                                r.icon = "el-icon-warning-outline";
+                                r.type = "primary"
+                                r.size = "large"
+                            }
+                            if (r.event == "sendOut" || r.event == "arrive") {
+                                r.color = '#0bbd87';
+                                r.size = "large"
+                            }
+                            if (r.event == "fetch") {
+                                r.icon = "el-icon-bangzhu";
+                                r.type = "warning"
+                                r.size = "large"
+                            }
+                            if (r.event == "dispatch") {
+                                r.icon = "el-icon-bicycle";
+                                r.type = "warning"
+                                r.size = "large"
+                            }
+                            if (r.event == "finish") {
+                                r.icon = "el-icon-success";
+                                r.type = "primary";
+                                r.size = "large"
+                            }
+                            if (r.event == "callback") {
+                                r.icon = "el-icon-remove";
+                                r.type = "danger";
+                                r.size = "large"
+                            }
+                        });
+                        self.order.current.deliveryInfo = deliveryInfo;
+                        console.log(this.order.current.deliveryInfo);
+                        self.order.current.deliver = res.data.deliver;
+                        self.order.current.receiver = res.data.receiver;
+                        self.order.current.nodes = res.data.route.node;
+                        self.order.current.route_now = res.data.route.now;
+
+                        this.order.routeVisible = true;
+                        if (self.order.map !== 0) {
+                            self.order_map_addRoute();
+                        }
+                    });
+            },
+            order_map_addRoute() {
+                let self = this;
+                let deliver = self.order.current.deliver;
+                let receiver = self.order.current.receiver;
+                let nodes = self.order.current.nodes;
+                let route_now = self.order.current.route_now;
+
+                self.order.DrivingRoute.clearResults();
+                self.order.map.clearOverlays();
+
+                // 卖家
+                self.order_addMarker(deliver.lng, deliver.lat, "seller", "png",
+                    30, 30, "卖家：" + deliver.name, "<br>" + deliver.address);
+                // 买家
+                self.order_addMarker(receiver.lng, receiver.lat, "seller_position", "png",
+                    30, 30, "买家：" + receiver.name, "<br>" + receiver.address);
+
+                let p_now = new BMap.Point(route_now.lon, route_now.lat);
+                let now_label = new BMap.Label(route_now.content, {position: p_now});
+                self.order.map.addOverlay(now_label);
+
+                let p_receiver = new BMap.Point(receiver.lng, receiver.lat);
+                let p_deliver = new BMap.Point(deliver.lng, deliver.lat);
+
+                let nodes_num = nodes.length;
+                if (nodes_num > 0) {
+                    let driving = this.order.DrivingRoute;
+                    for (let i = 0; i < nodes_num; i++) {
+                        self.order_addMarker(nodes[i].lng, nodes[i].lat, "express", "png",
+                            20, 20, "物流节点", "<br>" + nodes[i].address);
+                        if (i < nodes_num - 1) {
+                            let start = new this.order.BMap.Point(nodes[i].lng, nodes[i].lat);
+                            let end = new this.order.BMap.Point(nodes[i + 1].lng, nodes[i + 1].lat);
+                            driving.search(start, end);
+                        }
+                    }
+
+                    // 开始加线
+                    driving.setSearchCompleteCallback(function () {
+                        if (driving.getStatus() != BMAP_STATUS_SUCCESS) {
+                            this.$message.error('查询路径错误！');
+                            return;
+                        }
+
+                        let pts = driving.getResults().getPlan(0).getRoute(0).getPath();    //通过驾车实例，获得一系列点的数组
+                        let polyl_get = new BMap.Polyline(pts);
+                        self.order.map.addOverlay(polyl_get);
+
+                        let first_node = new BMap.Point(nodes[0].lng, nodes[0].lat);
+                        let last_node = new BMap.Point(nodes[nodes_num - 1].lng, nodes[nodes_num - 1].lat);
+
+                        let pll_s = new BMap.Polyline([p_deliver, first_node], {
+                            strokeColor: "#98FB98", strokeStyle: "dashed", strokeWeight: 3, strokeOpacity: 0.9
+                        });
+                        self.order.map.addOverlay(pll_s);
+                        let pll_r = new BMap.Polyline([last_node, p_receiver], {
+                            strokeColor: "#FFDEAD", strokeStyle: "dashed", strokeWeight: 3, strokeOpacity: 0.9
+                        });
+                        self.order.map.addOverlay(pll_r);
+
+                        setTimeout(function () {
+                            self.order.map.setViewport([p_deliver, p_receiver, first_node, last_node
+                            ]);          //调整到最佳视野
+                        }, 1000);
+                    })
+                } else {
+                    setTimeout(function () {
+                        self.order.map.setViewport([p_deliver, p_receiver
+                        ]);          //调整到最佳视野
+                    }, 1000);
+                }
+
+            },
+            order_addMarker(lng, lat, img_file, img_type, w, h, info_title, info_content) {
+                let self = this;
+                let p = new this.order.BMap.Point(lng, lat);
+                let m = new this.order.BMap.Marker(p, {
+                    icon: new this.order.BMap.Icon("/api/img?file=" + img_file + "&&type=" + img_type +
+                        "&&width=" + w + "&&height=" + h, new this.order.BMap.Size(w, h))
+                });
+                this.order.map.addOverlay(m);
+                let opts = {
+                    width: 0,
+                    height: 0,
+                    title: info_title,
+                };
+                let infoWindow = new this.order.BMap.InfoWindow(info_content, opts);
+                m.addEventListener('mouseover', function () {
+                    self.order.map.openInfoWindow(infoWindow, p);
+                });
+                m.addEventListener('mouseout', function () {
+                    self.order.map.closeInfoWindow(infoWindow, p);
+                });
             },
             order_mapHandler({BMap, map}) {
                 this.order.map = map;   //将map变量存储在全局
                 this.order.BMap = BMap;
+                this.order.DrivingRoute = new this.order.BMap.DrivingRoute(this.order.map);
 
                 this.order.mapInfo.center = Object.assign({}, this.login_user.location);
+                this.order_map_addRoute();
             },
-            callback_queryAll() {
-
+            callback_query() {
+                let url = '/api/seller/order/callback/';
+                let keyword = this.callback.search_keyword;
+                if (keyword !== "") {
+                    url = url + 'query?search_keyword=' + keyword + '&&username=' + URLSafeBase64.encode(this.login_user.username);
+                } else {
+                    url = url + 'queryAll?username=' + URLSafeBase64.encode(this.login_user.username);
+                }
+                axios.get(url)
+                    .then(res => {
+                        this.callback.all = res.data;
+                    });
+            },
+            callback_fresh() {
+                this.callback.search_keyword = "";
+                this.callback_query();
             },
             callback_agree(order) {
+                axios.get('/api/seller/order/callback/agree?id=' + order.id)
+                    .then(res => {
+                        if (res.data.ifSuccess) {
+                            this.$message({
+                                showClose: true,
+                                message: '退单成功！',
+                                type: "success"
+                            });
+                        } else {
+                            this.$message.error('退单失败！');
+                        }
+                    })
 
             },
             callback_finish(order) {
